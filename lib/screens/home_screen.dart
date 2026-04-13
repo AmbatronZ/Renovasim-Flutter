@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'profile_screen.dart';
 
 // ─── Color Palette ───────────────────────────────────────────────────────────
 class AppColors {
@@ -11,6 +12,8 @@ class AppColors {
   static const metallicBlack = Color(0xFF2C2C2B);
   static const white = Colors.white;
 }
+
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -77,23 +80,37 @@ class _HomeScreenState extends State<HomeScreen> {
 class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-      child: Row(
-        children: [
-          // Logo
-          SvgPicture.asset(
-            'assets/images/renovasim_logo.svg',
-            height: 32,
-          ),
-          const Spacer(),
-          // Icons
-          _IconBtn(icon: Icons.notifications_outlined),
-          const SizedBox(width: 4),
-          _IconBtn(icon: Icons.settings_outlined),
-          const SizedBox(width: 4),
-          _IconBtn(icon: Icons.person_outline_rounded),
-        ],
+    return SizedBox(
+      height: 60, // WAJIB
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+        child: Row(
+          children: [
+            SvgPicture.asset(
+              'assets/images/renovasim_logo.svg',
+              height: 32,
+            ),
+            const Spacer(),
+
+            _IconBtn(icon: Icons.notifications_outlined),
+            const SizedBox(width: 4),
+
+            _IconBtn(icon: Icons.settings_outlined),
+            const SizedBox(width: 4),
+
+            _IconBtn(
+              icon: Icons.person_outline_rounded,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ProfileScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -101,15 +118,28 @@ class _TopBar extends StatelessWidget {
 
 class _IconBtn extends StatelessWidget {
   final IconData icon;
-  const _IconBtn({required this.icon});
+  final VoidCallback? onTap;
+
+  const _IconBtn({
+    required this.icon,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {},
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        child: Icon(icon, size: 22, color: AppColors.metallicBlack),
+    return Material(
+      color: Colors.transparent, // penting
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            icon,
+            size: 22,
+            color: AppColors.metallicBlack,
+          ),
+        ),
       ),
     );
   }
@@ -200,7 +230,7 @@ class _HeroBanner extends StatelessWidget {
                         fontSize: 12,
                         color: Colors.white.withOpacity(0.85),
                         height: 1.5,
-                        fontFamily: 'PPNeue Montreal',
+                        fontFamily: 'PPNeueMontrealMedium',
                       ),
                     ),
                     const SizedBox(height: 16),
