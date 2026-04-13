@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'register_screen.dart';
 import 'error_screen.dart';
 import 'home_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -287,24 +288,16 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// ─── Logo Widget (pakai gambar lokal) ────────────────────────────────────────
+// ─── Logo Widget ────────────────────────────────────────
 
 class _RenovaSimLogo extends StatelessWidget {
   const _RenovaSimLogo();
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
+    return SvgPicture.asset(
       'assets/images/renovasim_logo.svg',
       height: 32,
-      errorBuilder: (_, __, ___) => const Text(
-        'RenovaSim',
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w800,
-          color: Color(0xFF0F172A),
-        ),
-      ),
     );
   }
 }

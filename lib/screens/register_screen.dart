@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -58,7 +59,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               size: 20, color: Color(0xFF0F172A)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const _RenovaSimLogoSmall(),
+        title:  _RenovaSimLogo(),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -306,42 +307,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 }
 
-class _RenovaSimLogoSmall extends StatelessWidget {
-  const _RenovaSimLogoSmall();
+class _RenovaSimLogo extends StatelessWidget {
+  const _RenovaSimLogo();
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Text(
-          'Ren',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF0F172A),
-          ),
-        ),
-        Container(
-          width: 16,
-          height: 16,
-          margin: const EdgeInsets.symmetric(horizontal: 1),
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: Color(0xFF2563EB),
-          ),
-          child: const Icon(Icons.home_rounded,
-              color: Colors.white, size: 10),
-        ),
-        const Text(
-          'vaSim',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF0F172A),
-          ),
-        ),
-      ],
+    return SvgPicture.asset(
+      'assets/images/renovasim_logo.svg',
+      height: 32,
     );
   }
 }

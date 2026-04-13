@@ -257,7 +257,7 @@ class _PortfolioSection extends StatelessWidget {
       isInProgress: true,
     ),
     _ProjectData(
-      title: 'Zen Office',
+      title: 'Futuristic Office',
       location: null,
       budget: 'Rp 4.250.000',
       status: 'DRAFTING',

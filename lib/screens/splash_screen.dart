@@ -3,6 +3,7 @@ import 'dart:async';
 import 'welcome_screen.dart';
 import 'error_screen.dart';
 import 'home_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -169,40 +170,13 @@ class _RenovaSimLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = light ? Colors.white : const Color(0xFF0F172A);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          'Ren',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-            color: color,
-            letterSpacing: -0.5,
-          ),
-        ),
-        Container(
-          width: 20,
-          height: 20,
-          margin: const EdgeInsets.symmetric(horizontal: 1),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: const Color(0xFF2563EB),
-          ),
-          child: const Icon(Icons.home_rounded, color: Colors.white, size: 12),
-        ),
-        Text(
-          'vaSim',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-            color: color,
-            letterSpacing: -0.5,
-          ),
-        ),
-      ],
+    return SvgPicture.asset(
+      'assets/images/renovasim_logo.svg',
+      height: 40,
+      colorFilter: ColorFilter.mode(
+        light ? Colors.white : const Color(0xFF2C2C2B),
+        BlendMode.srcIn,
+      ),
     );
   }
 }
