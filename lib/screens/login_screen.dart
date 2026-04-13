@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'register_screen.dart';
 import 'error_screen.dart';
+import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,11 +11,15 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailCtrl = TextEditingController(text: 'rusdi01gaming@gmail.com');
-  final _passCtrl = TextEditingController(text: '••••••••');
+  final _emailCtrl = TextEditingController(text:'rusdi01gaming@gmail.com');
+  final _passCtrl = TextEditingController(text:'12345678');
   bool _obscurePass = true;
   bool _rememberMe = false;
   bool _isLoading = false;
+
+  // Kredensial native sementara
+  static const String _validEmail = 'rusdi01gaming@gmail.com';
+  static const String _validPassword = '12345678';
 
   @override
   void dispose() {
@@ -29,13 +34,25 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    // Simulate "account not found" error
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const ErrorScreen(isNetworkError: false),
-      ),
-    );
+    final email = _emailCtrl.text.trim();
+    final password = _passCtrl.text.trim();
+
+    if (email == _validEmail && password == _validPassword) {
+      // Login berhasil → ke HomeScreen
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
+    } else {
+      // Login gagal → ke ErrorScreen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const ErrorScreen(isNetworkError: false),
+        ),
+      );
+    }
   }
 
   @override
@@ -50,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
               size: 20, color: Color(0xFF0F172A)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const _RenovaSimLogoSmall(),
+        title: const _RenovaSimLogo(),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -78,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // Email
               _InputLabel('Email'),
               const SizedBox(height: 8),
-              _TextField(
+              _InputField(
                 controller: _emailCtrl,
                 hint: 'Email address',
                 keyboardType: TextInputType.emailAddress,
@@ -88,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // Password
               _InputLabel('Password'),
               const SizedBox(height: 8),
-              _TextField(
+              _InputField(
                 controller: _passCtrl,
                 hint: 'Password',
                 obscure: _obscurePass,
@@ -160,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _handleLogin,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
+                    backgroundColor: const Color(0xFF3B411E),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -234,8 +251,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Text('Or',
-                      style: TextStyle(
-                          fontSize: 13, color: Colors.grey[400])),
+                      style:
+                          TextStyle(fontSize: 13, color: Colors.grey[400])),
                 ),
                 const Expanded(child: Divider()),
               ]),
@@ -243,7 +260,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // Google sign in
               _SocialButton(
-                icon: _googleIcon(),
+                icon: const Text('G',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF4285F4),
+                    )),
                 label: 'Sign in with Google',
                 onTap: () {},
               ),
@@ -263,14 +285,27 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+}
 
-  Widget _googleIcon() {
-    return const Text('G',
+// ─── Logo Widget (pakai gambar lokal) ────────────────────────────────────────
+
+class _RenovaSimLogo extends StatelessWidget {
+  const _RenovaSimLogo();
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      'assets/images/renovasim_logo.svg',
+      height: 32,
+      errorBuilder: (_, __, ___) => const Text(
+        'RenovaSim',
         style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          color: Color(0xFF4285F4),
-        ));
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
+          color: Color(0xFF0F172A),
+        ),
+      ),
+    );
   }
 }
 
@@ -293,14 +328,14 @@ class _InputLabel extends StatelessWidget {
   }
 }
 
-class _TextField extends StatelessWidget {
+class _InputField extends StatelessWidget {
   final TextEditingController controller;
   final String hint;
   final bool obscure;
   final TextInputType? keyboardType;
   final Widget? suffix;
 
-  const _TextField({
+  const _InputField({
     required this.controller,
     required this.hint,
     this.obscure = false,
@@ -320,11 +355,12 @@ class _TextField extends StatelessWidget {
         controller: controller,
         obscureText: obscure,
         keyboardType: keyboardType,
-        style: const TextStyle(fontSize: 14, color: Color(0xFF0F172A)),
+        style:
+            const TextStyle(fontSize: 14, color: Color(0xFF0F172A)),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle:
-              const TextStyle(fontSize: 14, color: Color(0xFFCBD5E1)),
+          hintStyle: const TextStyle(
+              fontSize: 14, color: Color(0xFFCBD5E1)),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           border: InputBorder.none,
@@ -374,45 +410,6 @@ class _SocialButton extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _RenovaSimLogoSmall extends StatelessWidget {
-  const _RenovaSimLogoSmall();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Text(
-          'Ren',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF0F172A),
-          ),
-        ),
-        Container(
-          width: 16,
-          height: 16,
-          margin: const EdgeInsets.symmetric(horizontal: 1),
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: Color(0xFF2563EB),
-          ),
-          child: const Icon(Icons.home_rounded, color: Colors.white, size: 10),
-        ),
-        const Text(
-          'vaSim',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF0F172A),
-          ),
-        ),
-      ],
     );
   }
 }

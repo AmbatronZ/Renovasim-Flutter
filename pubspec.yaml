@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
+  flutter_svg: ^2.0.10
 
 dev_dependencies:
   flutter_test:
@@ -19,9 +20,19 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
   assets:
     - assets/images/
+
   fonts:
-    - family: GTAFont
-      fonts:
-        - asset: assets/fonts/GTAFont-Regular.ttf
+  - family: PPEditorialNew
+    fonts:
+      - asset: assets/fonts/PP-Editorial-New/PPEditorialNew-Regular-BF644b214ff145f.otf
+      - asset: assets/fonts/PP-Editorial-New/PPEditorialNew-Italic-BF644b214fb0c0a.otf
+        style: italic
+
+  - family: PPNeueMontrealMedium
+    fonts:
+      - asset: assets/fonts/PP-Neue-Montreal/ppneuemontreal-medium.otf
+      - asset: assets/fonts/PP-Neue-Montreal/ppneuemontreal-bold.otf
+        weight: 700

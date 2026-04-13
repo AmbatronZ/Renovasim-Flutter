@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/splash_screen.dart';
+import 'screens/home_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,10 +24,10 @@ class RenovaSimApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2563EB),
-          primary: const Color(0xFF2563EB),
+          seedColor: const Color(0xFF8BA023),
+          primary: const Color(0xFF8BA023),
         ),
-        fontFamily: 'SF Pro Display',
+        fontFamily: 'PPNeueMontrealMedium',
         useMaterial3: true,
       ),
       home: const SplashScreen(),
