@@ -1,6 +1,10 @@
+// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../models/renovation_models.dart';
+import 'project_detail_screen.dart';
+import 'manage_payment_screen.dart';
 
 // ─── Color Palette ───────────────────────────────────────────────────────────
 class AppColors {
@@ -37,9 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top nav bar
             _TopBar(),
-            // Scrollable content
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -47,13 +49,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 16),
-                    // Hero Banner
                     _HeroBanner(),
                     const SizedBox(height: 28),
-                    // Portfolio section
                     _PortfolioSection(),
                     const SizedBox(height: 24),
-                    // Budget Insight
                     _BudgetInsightCard(),
                     const SizedBox(height: 24),
                   ],
@@ -73,7 +72,6 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 // ─── Top Bar ─────────────────────────────────────────────────────────────────
-
 class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -81,13 +79,11 @@ class _TopBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
       child: Row(
         children: [
-          // Logo
           SvgPicture.asset(
             'assets/images/renovasim_logo.svg',
             height: 32,
           ),
           const Spacer(),
-          // Icons
           _IconBtn(icon: Icons.notifications_outlined),
           const SizedBox(width: 4),
           _IconBtn(icon: Icons.settings_outlined),
@@ -116,7 +112,6 @@ class _IconBtn extends StatelessWidget {
 }
 
 // ─── Hero Banner ─────────────────────────────────────────────────────────────
-
 class _HeroBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -129,7 +124,6 @@ class _HeroBanner extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Background image
               Image.asset(
                 'assets/images/background1.png',
                 fit: BoxFit.cover,
@@ -146,7 +140,6 @@ class _HeroBanner extends StatelessWidget {
                   ),
                 ),
               ),
-              // Dark overlay
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -159,7 +152,6 @@ class _HeroBanner extends StatelessWidget {
                   ),
                 ),
               ),
-              // Content
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -204,7 +196,6 @@ class _HeroBanner extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // CTA button
                     GestureDetector(
                       onTap: () {},
                       child: Container(
@@ -245,34 +236,262 @@ class _HeroBanner extends StatelessWidget {
 }
 
 // ─── Portfolio Section ────────────────────────────────────────────────────────
-
 class _PortfolioSection extends StatelessWidget {
-  final List<_ProjectData> projects = const [
-    _ProjectData(
+  // Data dummy proyek yang akan digunakan di detail
+  static final List<RenovationProject> _dummyProjects = [
+    // Scandinavian Room
+    RenovationProject(
+      id: 'proj-001',
+      projectName: 'Scandinavian Room',
+      description:
+          'Renovasi ruang tamu bergaya Skandinavia dengan sentuhan minimalis, fokus pada pencahayaan alami dan material kayu.',
+      items: [
+        RenovationItem(
+          id: '1',
+          name: 'Cat Tembok Putih',
+          description: 'Cat interior premium',
+          category: MaterialCategory.paint,
+          quantity: 3,
+          unit: 'galon',
+          unitPrice: 280000,
+          isEssential: true,
+        ),
+        RenovationItem(
+          id: '2',
+          name: 'Lantai Parket Kayu',
+          description: 'Parket solid oak',
+          category: MaterialCategory.wood,
+          quantity: 25,
+          unit: 'm²',
+          unitPrice: 350000,
+          isEssential: true,
+        ),
+        RenovationItem(
+          id: '3',
+          name: 'Lampu Gantung',
+          description: 'Desain minimalis',
+          category: MaterialCategory.electric,
+          quantity: 2,
+          unit: 'pcs',
+          unitPrice: 450000,
+          isEssential: false,
+        ),
+        RenovationItem(
+          id: '4',
+          name: 'Tenaga Tukang',
+          description: 'Upah harian',
+          category: MaterialCategory.labor,
+          quantity: 15,
+          unit: 'hari',
+          unitPrice: 200000,
+          isEssential: true,
+        ),
+      ],
+      recommendations: [
+        PriceRecommendation(
+          itemId: '1',
+          itemName: 'Cat Tembok Putih',
+          currentPrice: 280000,
+          recommendedPrice: 250000,
+          savingPercentage: 10.7,
+          reason: 'Supplier lokal menawarkan diskon untuk pembelian 3 galon.',
+          supplier: 'Toko Cat Maju',
+        ),
+      ],
+      costCuttingRecs: [
+        CostCuttingRecommendation(
+          title: 'Ganti Lampu Gantung dengan Downlight',
+          description: 'Lebih hemat dan fungsional',
+          potentialSaving: 600000,
+          priority: 'medium',
+          category: 'Listrik',
+          suggestions: ['Downlight LED 12W', 'Lampu panel persegi'],
+        ),
+      ],
+      costBreakdown: CostBreakdown(
+        essentialCost: 9590000,
+        optionalCost: 900000,
+        laborCost: 3000000,
+        discountAmount: 300000,
+        tax: 674500,
+        adminFee: 100000,
+      ),
+      createdAt: DateTime.now().subtract(const Duration(days: 5)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 1)),
+    ),
+    // Futuristic Office
+    RenovationProject(
+      id: 'proj-002',
+      projectName: 'Futuristic Office',
+      description:
+          'Desain kantor modern dengan konsep futuristik, menggunakan material metalik dan kaca.',
+      items: [
+        RenovationItem(
+          id: '5',
+          name: 'Partisi Kaca',
+          description: 'Kaca tempered 10mm',
+          category: MaterialCategory.wood,
+          quantity: 12,
+          unit: 'm²',
+          unitPrice: 750000,
+          isEssential: true,
+        ),
+        RenovationItem(
+          id: '6',
+          name: 'Lantai Vinyl',
+          description: 'Motif beton',
+          category: MaterialCategory.tile,
+          quantity: 40,
+          unit: 'm²',
+          unitPrice: 120000,
+          isEssential: true,
+        ),
+        RenovationItem(
+          id: '7',
+          name: 'Lampu LED Strip',
+          description: 'RGB smart',
+          category: MaterialCategory.electric,
+          quantity: 10,
+          unit: 'meter',
+          unitPrice: 85000,
+          isEssential: false,
+        ),
+        RenovationItem(
+          id: '8',
+          name: 'Tenaga Tukang',
+          description: 'Upah harian',
+          category: MaterialCategory.labor,
+          quantity: 20,
+          unit: 'hari',
+          unitPrice: 220000,
+          isEssential: true,
+        ),
+      ],
+      recommendations: [],
+      costCuttingRecs: [],
+      costBreakdown: CostBreakdown(
+        essentialCost: 13800000,
+        optionalCost: 850000,
+        laborCost: 4400000,
+        discountAmount: 0,
+        tax: 952500,
+        adminFee: 150000,
+      ),
+      createdAt: DateTime.now().subtract(const Duration(days: 10)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 2)),
+    ),
+    // Matte Kitchen
+    RenovationProject(
+      id: 'proj-003',
+      projectName: 'Matte Kitchen',
+      description:
+          'Dapur dengan finishing matte, kabinet kayu, dan backsplash keramik.',
+      items: [
+        RenovationItem(
+          id: '9',
+          name: 'Kabinet Bawah',
+          description: 'Kayu lapis finishing matte',
+          category: MaterialCategory.wood,
+          quantity: 4,
+          unit: 'unit',
+          unitPrice: 1200000,
+          isEssential: true,
+        ),
+        RenovationItem(
+          id: '10',
+          name: 'Keramik Dinding',
+          description: '20x25 cm matte',
+          category: MaterialCategory.tile,
+          quantity: 15,
+          unit: 'm²',
+          unitPrice: 220000,
+          isEssential: true,
+        ),
+        RenovationItem(
+          id: '11',
+          name: 'Kran Wastafel',
+          description: 'Stainless steel',
+          category: MaterialCategory.plumbing,
+          quantity: 1,
+          unit: 'pcs',
+          unitPrice: 450000,
+          isEssential: true,
+        ),
+        RenovationItem(
+          id: '12',
+          name: 'Tenaga Tukang',
+          description: 'Upah borongan',
+          category: MaterialCategory.labor,
+          quantity: 1,
+          unit: 'paket',
+          unitPrice: 5000000,
+          isEssential: true,
+        ),
+      ],
+      recommendations: [
+        PriceRecommendation(
+          itemId: '10',
+          itemName: 'Keramik Dinding',
+          currentPrice: 220000,
+          recommendedPrice: 190000,
+          savingPercentage: 13.6,
+          reason: 'Alternatif dengan motif serupa dari distributor.',
+          supplier: 'Keramik Indah',
+        ),
+      ],
+      costCuttingRecs: [
+        CostCuttingRecommendation(
+          title: 'Kurangi Jumlah Kabinet Atas',
+          description: 'Gunakan rak terbuka untuk menghemat',
+          potentialSaving: 2400000,
+          priority: 'high',
+          category: 'Kayu',
+          suggestions: ['Rak kayu solid', 'Rak besi minimalis'],
+        ),
+      ],
+      costBreakdown: CostBreakdown(
+        essentialCost: 12950000,
+        optionalCost: 0,
+        laborCost: 5000000,
+        discountAmount: 200000,
+        tax: 897500,
+        adminFee: 100000,
+      ),
+      createdAt: DateTime.now().subtract(const Duration(days: 2)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 2)),
+    ),
+  ];
+
+  // Data untuk tampilan card (tetap sederhana)
+  final List<_ProjectCardData> cardData = const [
+    _ProjectCardData(
       title: 'Scandinavian Room',
       location: 'Jakarta, ID',
       budget: 'Rp 15.500.000',
       status: 'IN PROGRESS',
       imagePath: 'assets/images/background3.png',
       isInProgress: true,
+      projectIndex: 0,
     ),
-    _ProjectData(
+    _ProjectCardData(
       title: 'Futuristic Office',
       location: null,
-      budget: 'Rp 4.250.000',
+      budget: 'Rp 18.500.000',
       status: 'DRAFTING',
       imagePath: 'assets/images/background4.png',
       isInProgress: false,
       draftInfo: '12 item',
+      projectIndex: 1,
     ),
-    _ProjectData(
+    _ProjectCardData(
       title: 'Matte Kitchen',
       location: null,
-      budget: 'Rp 8.900.000',
+      budget: 'Rp 18.800.000',
       status: null,
       imagePath: 'assets/images/background2.png',
       isInProgress: false,
       updatedInfo: 'Updated 2h ago',
+      projectIndex: 2,
     ),
   ];
 
@@ -281,7 +500,6 @@ class _PortfolioSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section header
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
@@ -339,227 +557,254 @@ class _PortfolioSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-
-        // Project cards — vertical list
-        ...projects.map((p) => Padding(
+        ...cardData.map((data) => Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-              child: _ProjectCard(data: p),
+              child: _ProjectCard(
+                data: data,
+                project: _dummyProjects[data.projectIndex],
+              ),
             )),
       ],
     );
   }
 }
 
+class _ProjectCardData {
+  final String title;
+  final String? location;
+  final String budget;
+  final String? status;
+  final String imagePath;
+  final bool isInProgress;
+  final String? draftInfo;
+  final String? updatedInfo;
+  final int projectIndex;
+
+  const _ProjectCardData({
+    required this.title,
+    required this.location,
+    required this.budget,
+    required this.status,
+    required this.imagePath,
+    required this.isInProgress,
+    this.draftInfo,
+    this.updatedInfo,
+    required this.projectIndex,
+  });
+}
+
 class _ProjectCard extends StatelessWidget {
-  final _ProjectData data;
-  const _ProjectCard({required this.data});
+  final _ProjectCardData data;
+  final RenovationProject project;
+
+  const _ProjectCard({required this.data, required this.project});
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: SizedBox(
-        height: 160,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Background image
-            Image.asset(
-              data.imagePath,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                color: AppColors.thatchGreen,
-              ),
-            ),
-            // Gradient overlay
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.1),
-                    Colors.black.withOpacity(0.55),
-                  ],
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProjectDetailScreen(project: project),
+          ),
+        );
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: SizedBox(
+          height: 160,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset(
+                data.imagePath,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  color: AppColors.thatchGreen,
                 ),
               ),
-            ),
-
-            // Budget top-right
-            Positioned(
-              top: 12,
-              right: 12,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.92),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  data.budget,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.metallicBlack,
-                    fontFamily: 'PPNeueMontrealMedium',
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.1),
+                      Colors.black.withOpacity(0.55),
+                    ],
                   ),
                 ),
               ),
-            ),
-
-            // Bottom content
-            Positioned(
-              left: 14,
-              right: 14,
-              bottom: 14,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Status badge
-                        if (data.status != null)
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 6),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: data.isInProgress
-                                  ? AppColors.coconutGreen
-                                  : AppColors.zenGray.withOpacity(0.85),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              data.status!,
-                              style: const TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                          ),
-                        Text(
-                          data.title,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                            fontFamily: 'PPEditorialNew',
-                          ),
-                        ),
-                        if (data.location != null)
-                          Row(
-                            children: [
-                              const Icon(Icons.location_on_outlined,
-                                  size: 12, color: Colors.white70),
-                              const SizedBox(width: 3),
-                              Text(
-                                data.location!,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
-                          ),
-                        if (data.draftInfo != null)
-                          Row(
-                            children: [
-                              const Icon(Icons.layers_outlined,
-                                  size: 12, color: Colors.white70),
-                              const SizedBox(width: 3),
-                              Text(
-                                data.draftInfo!,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
-                          ),
-                        if (data.updatedInfo != null)
-                          Row(
-                            children: [
-                              const Icon(Icons.access_time_rounded,
-                                  size: 12, color: Colors.white70),
-                              const SizedBox(width: 3),
-                              Text(
-                                data.updatedInfo!,
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-                  // Arrow button
-                  if (data.isInProgress)
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.arrow_forward_rounded,
-                          size: 18, color: AppColors.metallicBlack),
-                    ),
-                ],
-              ),
-            ),
-
-            // TOTAL BUDGET label for in-progress card
-            if (data.isInProgress)
               Positioned(
                 top: 12,
                 right: 12,
-                child: Column(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.92),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    data.budget,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.metallicBlack,
+                      fontFamily: 'PPNeueMontrealMedium',
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 14,
+                right: 14,
+                bottom: 14,
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.92),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                    Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            'TOTAL BUDGET',
-                            style: TextStyle(
-                              fontSize: 8,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.zenGray,
-                              letterSpacing: 0.8,
+                          if (data.status != null)
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 6),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: data.isInProgress
+                                    ? AppColors.coconutGreen
+                                    : AppColors.zenGray.withOpacity(0.85),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                data.status!,
+                                style: const TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
                             ),
-                          ),
                           Text(
-                            data.budget,
+                            data.title,
                             style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.metallicBlack,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
                               fontFamily: 'PPEditorialNew',
                             ),
                           ),
+                          if (data.location != null)
+                            Row(
+                              children: [
+                                const Icon(Icons.location_on_outlined,
+                                    size: 12, color: Colors.white70),
+                                const SizedBox(width: 3),
+                                Text(
+                                  data.location!,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          if (data.draftInfo != null)
+                            Row(
+                              children: [
+                                const Icon(Icons.layers_outlined,
+                                    size: 12, color: Colors.white70),
+                                const SizedBox(width: 3),
+                                Text(
+                                  data.draftInfo!,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          if (data.updatedInfo != null)
+                            Row(
+                              children: [
+                                const Icon(Icons.access_time_rounded,
+                                    size: 12, color: Colors.white70),
+                                const SizedBox(width: 3),
+                                Text(
+                                  data.updatedInfo!,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ],
+                            ),
                         ],
                       ),
                     ),
+                    if (data.isInProgress)
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.arrow_forward_rounded,
+                            size: 18, color: AppColors.metallicBlack),
+                      ),
                   ],
                 ),
               ),
-          ],
+              if (data.isInProgress)
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.92),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'TOTAL BUDGET',
+                              style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.zenGray,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                            Text(
+                              data.budget,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.metallicBlack,
+                                fontFamily: 'PPEditorialNew',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -567,7 +812,6 @@ class _ProjectCard extends StatelessWidget {
 }
 
 // ─── Budget Insight Card ──────────────────────────────────────────────────────
-
 class _BudgetInsightCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -605,7 +849,6 @@ class _BudgetInsightCard extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                // Decorative camera/report icon
                 Container(
                   width: 48,
                   height: 48,
@@ -660,7 +903,6 @@ class _BudgetInsightCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            // Divider
             const Divider(color: Color(0xFFEEEEEE)),
             const SizedBox(height: 14),
             Text(
@@ -675,7 +917,7 @@ class _BudgetInsightCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              'Rp 28.650.000',
+              'Rp 52.800.000',
               style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
@@ -684,7 +926,6 @@ class _BudgetInsightCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 18),
-            // Buttons
             Row(
               children: [
                 Expanded(
@@ -712,7 +953,13 @@ class _BudgetInsightCard extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const ManagePaymentScreen()),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.coconutGreen,
                       foregroundColor: Colors.white,
@@ -742,7 +989,6 @@ class _BudgetInsightCard extends StatelessWidget {
 }
 
 // ─── Bottom Navigation ────────────────────────────────────────────────────────
-
 class _BottomNav extends StatelessWidget {
   final List<_NavItem> items;
   final int selectedIndex;
@@ -818,31 +1064,8 @@ class _BottomNav extends StatelessWidget {
 }
 
 // ─── Data Models ─────────────────────────────────────────────────────────────
-
 class _NavItem {
   final IconData icon;
   final String label;
   const _NavItem({required this.icon, required this.label});
-}
-
-class _ProjectData {
-  final String title;
-  final String? location;
-  final String budget;
-  final String? status;
-  final String imagePath;
-  final bool isInProgress;
-  final String? draftInfo;
-  final String? updatedInfo;
-
-  const _ProjectData({
-    required this.title,
-    required this.location,
-    required this.budget,
-    required this.status,
-    required this.imagePath,
-    required this.isInProgress,
-    this.draftInfo,
-    this.updatedInfo,
-  });
 }

@@ -1,7 +1,7 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/splash_screen.dart';
-import 'screens/home_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +30,7 @@ class RenovaSimApp extends StatelessWidget {
         fontFamily: 'PPNeueMontrealMedium',
         useMaterial3: true,
       ),
-      home: const SplashScreen(),
+      home: const SplashScreen(), // atau langsung HomeScreen() untuk testing
     );
   }
 }
