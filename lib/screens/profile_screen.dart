@@ -21,9 +21,13 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          Icon(Icons.notifications, color: Colors.blue),
-          SizedBox(width: 16),
-        ],
+        IconButton(
+          icon: const Icon(Icons.notifications_outlined),
+          color: AppColors.metallicBlack,
+          onPressed: () {},
+        ),
+        const SizedBox(width: 8),
+      ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),

@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 
-class ProfileSettingScreen extends StatelessWidget {
+class ProfileSettingScreen extends StatefulWidget {
   const ProfileSettingScreen({super.key});
+
+  @override
+  State<ProfileSettingScreen> createState() => _ProfileSettingScreenState();
+}
+
+class _ProfileSettingScreenState extends State<ProfileSettingScreen> {
+  String? _selectedGender;
 
   @override
   Widget build(BuildContext context) {
@@ -20,16 +27,16 @@ class ProfileSettingScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             CircleAvatar(
               radius: 40,
               backgroundColor: AppColors.coconutGreen,
-              child: Icon(Icons.person, size: 40, color: Colors.white),
+              child: const Icon(Icons.person, size: 40, color: Colors.white),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               "Rusdi Ambalan",
               style: TextStyle(
@@ -38,22 +45,66 @@ class ProfileSettingScreen extends StatelessWidget {
                 fontFamily: 'PPNeueMontrealMedium',
               ),
             ),
-            Text("@rusdi01gaming"),
-            SizedBox(height: 20),
+            const Text("@rusdi01gaming"),
+            const SizedBox(height: 20),
 
             _input("First Name", "Rusdi"),
             _input("Last Name", "Ambalan"),
             _input("Phone", ""),
-            _input("Gender", ""),
+
+            // Gender dropdown
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0xFFBDBDBD)),
+              ),
+              child: DropdownButtonFormField<String>(
+                value: _selectedGender,
+                decoration: InputDecoration(
+                  labelText: 'Gender',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'Laki-laki',
+                    child: Text('Laki-laki'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Perempuan',
+                    child: Text('Perempuan'),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() => _selectedGender = value);
+                },
+                hint: const Text(
+                  'Pilih gender',
+                  style: TextStyle(color: Color(0xFFBDBDBD)),
+                ),
+              ),
+            ),
+
             _input("Birth Date", "26 - Mei - 2006"),
 
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.coconutGreen,
-                minimumSize: Size(double.infinity, 50),
+                foregroundColor: Colors.white, // ← fix teks tidak terlihat
+                minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -61,10 +112,12 @@ class ProfileSettingScreen extends StatelessWidget {
               child: Text(
                 "Update Profile",
                 style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
                   fontFamily: 'PPNeueMontrealMedium',
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

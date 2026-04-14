@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             // Top nav bar
-            _TopBar(),
+            _TopBar(parentContext: context),
             // Scrollable content
             Expanded(
               child: SingleChildScrollView(
@@ -78,39 +78,36 @@ class _HomeScreenState extends State<HomeScreen> {
 // ─── Top Bar ─────────────────────────────────────────────────────────────────
 
 class _TopBar extends StatelessWidget {
+  final BuildContext parentContext;
+  const _TopBar({required this.parentContext});
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 60, // WAJIB
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
-        child: Row(
-          children: [
-            SvgPicture.asset(
-              'assets/images/renovasim_logo.svg',
-              height: 32,
-            ),
-            const Spacer(),
-
-            _IconBtn(icon: Icons.notifications_outlined),
-            const SizedBox(width: 4),
-
-            _IconBtn(icon: Icons.settings_outlined),
-            const SizedBox(width: 4),
-
-            _IconBtn(
-              icon: Icons.person_outline_rounded,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const ProfileScreen(),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+      child: Row(
+        children: [
+          SvgPicture.asset(
+            'assets/images/renovasim_logo.svg',
+            height: 32,
+          ),
+          const Spacer(),
+          _IconBtn(icon: Icons.notifications_outlined),
+          const SizedBox(width: 4),
+          _IconBtn(icon: Icons.settings_outlined),
+          const SizedBox(width: 4),
+          _IconBtn(
+            icon: Icons.person_outline_rounded,
+            onTap: () {
+              Navigator.push(
+                parentContext, // ← pakai parentContext
+                MaterialPageRoute(
+                  builder: (_) => const ProfileScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -287,20 +284,20 @@ class _PortfolioSection extends StatelessWidget {
       isInProgress: true,
     ),
     _ProjectData(
-      title: 'Futuristic Office',
+      title: 'Minimalist Office',
       location: null,
       budget: 'Rp 4.250.000',
       status: 'DRAFTING',
-      imagePath: 'assets/images/background4.png',
+      imagePath: 'assets/images/background6.png',
       isInProgress: false,
       draftInfo: '12 item',
     ),
     _ProjectData(
-      title: 'Matte Kitchen',
+      title: 'Cozy Matte Kitchen',
       location: null,
       budget: 'Rp 8.900.000',
-      status: null,
-      imagePath: 'assets/images/background2.png',
+      status: 'Done',
+      imagePath: 'assets/images/background5.png',
       isInProgress: false,
       updatedInfo: 'Updated 2h ago',
     ),
