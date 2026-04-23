@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'profile_screen.dart';
+import 'settings_screen.dart';
 
 // ─── Color Palette ───────────────────────────────────────────────────────────
 class AppColors {
@@ -92,10 +93,18 @@ class _TopBar extends StatelessWidget {
             height: 32,
           ),
           const Spacer(),
-          _IconBtn(icon: Icons.notifications_outlined),
-          const SizedBox(width: 4),
-          _IconBtn(icon: Icons.settings_outlined),
-          const SizedBox(width: 4),
+            _IconBtn(
+              icon: Icons.notifications_outlined),
+                const SizedBox(width: 4),
+            _IconBtn(
+              icon: Icons.settings_outlined,
+              onTap: () {
+                Navigator.push(
+                  parentContext,
+                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                );
+              },
+            ),
           _IconBtn(
             icon: Icons.person_outline_rounded,
             onTap: () {
