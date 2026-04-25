@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'profile_screen.dart';
 import 'settings_screen.dart';
+import 'cs_screen.dart';
 
 // ─── Color Palette ───────────────────────────────────────────────────────────
 class AppColors {
@@ -71,6 +72,33 @@ class _HomeScreenState extends State<HomeScreen> {
         items: _navItems,
         selectedIndex: _selectedNav,
         onTap: (i) => setState(() => _selectedNav = i),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => SizedBox(
+              height: MediaQuery.of(context).size.height * 0.85,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+                child: const CsScreen(),
+              ),
+            ),
+          );
+        },
+        backgroundColor: AppColors.coconutGreen,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Icon(
+          Icons.headset_mic_rounded,
+          color: Colors.white,
+          size: 26,
+        ),
       ),
     );
   }

@@ -18,194 +18,206 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.techWhite,
-      body: Column(
+      body: Stack(
         children: [
-          // ─── Header ───────────────────────────────────────────────
+          // ─── Green header background ─────────────────────────────
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(20, 56, 20, 24),
-            decoration: const BoxDecoration(
-              color: AppColors.thatchGreen,
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(0),
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.settings_rounded,
-                    color: Colors.white, size: 24),
-                const SizedBox(width: 10),
-                Text(
-                  'Settings',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    fontFamily: 'PPEditorialNew',
-                  ),
-                ),
-              ],
-            ),
+            height: 160,
+            color: AppColors.thatchGreen,
           ),
 
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ─── Profile Card ────────────────────────────────
-                  Container(
-                    margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.metallicBlack.withOpacity(0.06),
-                          blurRadius: 12,
-                          offset: const Offset(0, 3),
+          SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ─── AppBar row ──────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 8, 16, 0),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                            color: Colors.white, size: 20),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      Text(
+                        'My Account',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          fontFamily: 'PPEditorialNew',
                         ),
-                      ],
-                    ),
-                    child: Row(
+                      ),
+                    ],
+                  ),
+                ),
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundColor:
-                              AppColors.coconutGreen.withOpacity(0.2),
-                          child: const Icon(Icons.person_rounded,
-                              color: AppColors.coconutGreen, size: 26),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Rusdi Ambalan',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.metallicBlack,
-                                  fontFamily: 'PPEditorialNew',
-                                ),
-                              ),
-                              Text(
-                                '@rusdi01gaming',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.zenGray,
-                                  fontFamily: 'PPNeueMontrealMedium',
-                                ),
+                        const SizedBox(height: 16),
+
+                        // ─── Profile Card ────────────────────────
+                        Container(
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 16),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.metallicBlack
+                                    .withOpacity(0.07),
+                                blurRadius: 14,
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 26,
+                                backgroundColor:
+                                    AppColors.coconutGreen.withOpacity(0.15),
+                                child: const Icon(Icons.person_rounded,
+                                    color: AppColors.coconutGreen, size: 28),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Rusdi Ambalan',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.metallicBlack,
+                                    fontFamily: 'PPEditorialNew',
+                                  ),
+                                ),
+                              ),
+                              const Icon(Icons.notifications_rounded,
+                                  color: AppColors.coconutGreen, size: 22),
+                            ],
+                          ),
                         ),
-                        Icon(Icons.notifications_rounded,
-                            color: AppColors.coconutGreen, size: 22),
+
+                        const SizedBox(height: 24),
+
+                        // ─── Account Settings ────────────────────
+                        _SectionLabel('Account Settings'),
+                        const SizedBox(height: 6),
+                        _SettingsCard(
+                          children: [
+                            _SettingsTile(
+                              label: 'Edit profile',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const ProfileScreen()),
+                              ),
+                            ),
+                            _Divider(),
+                            _SettingsTile(
+                              label: 'Change password',
+                              onTap: () {},
+                            ),
+                            _Divider(),
+                            _SettingsTile(
+                              label: 'Keamanan dan izin',
+                              onTap: () {},
+                            ),
+                            _Divider(),
+                            _SettingsTileSwitch(
+                              label: 'Push notifications',
+                              value: _pushNotifications,
+                              onChanged: (v) =>
+                                  setState(() => _pushNotifications = v),
+                            ),
+                            _Divider(),
+                            _SettingsTileSwitch(
+                              label: 'Dark mode',
+                              value: _darkMode,
+                              onChanged: (v) =>
+                                  setState(() => _darkMode = v),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // ─── More ────────────────────────────────
+                        _SectionLabel('More'),
+                        const SizedBox(height: 6),
+                        _SettingsCard(
+                          children: [
+                            _SettingsTile(
+                              label: 'About us',
+                              onTap: () {},
+                            ),
+                            _Divider(),
+                            _SettingsTile(
+                              label: 'Help & Support',
+                              onTap: () {},
+                            ),
+                            _Divider(),
+                            _SettingsTile(
+                              label: 'Terms and conditions',
+                              onTap: () {},
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // ─── Log out ─────────────────────────────
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 16),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const LoginScreen()),
+                                  (route) => false,
+                                );
+                              },
+                              icon: const Icon(Icons.logout_rounded,
+                                  color: Colors.red, size: 18),
+                              label: Text(
+                                'Log out',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.red,
+                                  fontFamily: 'PPNeueMontrealMedium',
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(
+                                    color: Colors.red, width: 1.2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
                       ],
                     ),
                   ),
-
-                  // ─── Account Settings ────────────────────────────
-                  _SectionLabel('Account Settings'),
-                  _SettingsCard(
-                    children: [
-                      _SettingsTile(
-                        label: 'Edit profile',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const ProfileScreen()),
-                        ),
-                      ),
-                      _Divider(),
-                      _SettingsTile(
-                        label: 'Change password',
-                        onTap: () {},
-                      ),
-                      _Divider(),
-                      _SettingsTile(
-                        label: 'Keamanan dan izin',
-                        onTap: () {},
-                      ),
-                      _Divider(),
-                      _SettingsTileSwitch(
-                        label: 'Push notifications',
-                        value: _pushNotifications,
-                        onChanged: (v) =>
-                            setState(() => _pushNotifications = v),
-                      ),
-                      _Divider(),
-                      _SettingsTileSwitch(
-                        label: 'Dark mode',
-                        value: _darkMode,
-                        onChanged: (v) => setState(() => _darkMode = v),
-                      ),
-                    ],
-                  ),
-
-                  // ─── More ────────────────────────────────────────
-                  _SectionLabel('More'),
-                  _SettingsCard(
-                    children: [
-                      _SettingsTile(
-                        label: 'About us',
-                        onTap: () {},
-                      ),
-                      _Divider(),
-                      _SettingsTile(
-                        label: 'Help & Support',
-                        onTap: () {},
-                      ),
-                      _Divider(),
-                      _SettingsTile(
-                        label: 'Terms and conditions',
-                        onTap: () {},
-                      ),
-                    ],
-                  ),
-
-                  // ─── Logout ──────────────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const LoginScreen()),
-                            (route) => false,
-                          );
-                        },
-                        icon: const Icon(Icons.logout_rounded,
-                            color: Colors.red, size: 18),
-                        label: Text(
-                          'Log out',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.red,
-                            fontFamily: 'PPNeueMontrealMedium',
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.red, width: 1.2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
@@ -223,14 +235,13 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 6),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
           color: AppColors.zenGray,
-          letterSpacing: 0.5,
           fontFamily: 'PPNeueMontrealMedium',
         ),
       ),
@@ -274,7 +285,8 @@ class _SettingsTile extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -309,7 +321,7 @@ class _SettingsTileSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
