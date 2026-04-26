@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'login_screen.dart';
+import 'about_us_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -155,10 +156,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const SizedBox(height: 6),
                         _SettingsCard(
                           children: [
-                            _SettingsTile(
-                              label: 'About us',
-                              onTap: () {},
-                            ),
+                           _SettingsTile(
+                                label: 'About us',
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const AboutUsScreen()),
+                                ),
+                              ),
                             _Divider(),
                             _SettingsTile(
                               label: 'Help & Support',
