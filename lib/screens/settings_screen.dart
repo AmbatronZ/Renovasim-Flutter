@@ -3,6 +3,8 @@ import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'login_screen.dart';
 import 'about_us_screen.dart';
+import 'help_support_screen.dart';
+import 'terms_conditions_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -164,15 +166,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
                               ),
                             _Divider(),
-                            _SettingsTile(
+                          _SettingsTile(
                               label: 'Help & Support',
-                              onTap: () {},
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const HelpSupportScreen()),
+                              ),
                             ),
                             _Divider(),
-                            _SettingsTile(
-                              label: 'Terms and conditions',
-                              onTap: () {},
+                        _SettingsTile(
+                            label: 'Terms and conditions',
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const TermsConditionsScreen()),
                             ),
+                          ),
                           ],
                         ),
 

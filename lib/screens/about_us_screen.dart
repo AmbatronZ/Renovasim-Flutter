@@ -110,15 +110,7 @@ class AboutUsScreen extends StatelessWidget {
                               _SectionTitle('Tentang RenovaSim'),
                               const SizedBox(height: 12),
                               _BodyText(
-                                'RenovaSim adalah aplikasi dan platform berbasis web yang dirancang untuk membantu pengguna dalam merencanakan pembangunan rumah secara lebih efisien dan terukur. Kami menyediakan solusi estimasi kebutuhan bahan bangunan yang akurat, sehingga pengguna dapat mengontrol biaya dan mengurangi risiko kesalahan perhitungan.',
-                              ),
-                              const SizedBox(height: 12),
-                              _BodyText(
-                                'Dengan menggabungkan teknologi perhitungan digital dan visualisasi 3D interaktif, RenovaSim memungkinkan pengguna tidak hanya menghitung kebutuhan material, tetapi juga melihat gambaran awal dari rumah impian mereka secara realistis. Pendekatan ini membantu dalam pengambilan keputusan yang lebih tepat sebelum proses pembangunan dimulai.',
-                              ),
-                              const SizedBox(height: 12),
-                              _BodyText(
-                                'RenovaSim dikembangkan untuk menjawab kebutuhan masyarakat modern yang menginginkan perencanaan pembangunan yang praktis, cepat, dan transparan. Baik untuk individu, kontraktor, maupun pengembang, platform ini hadir sebagai alat bantu yang andal dalam setiap tahap perencanaan.',
+                                'RenovaSim adalah aplikasi dan platform berbasis web yang dirancang untuk membantu pengguna dalam merencanakan pembangunan rumah secara lebih efisien dan terukur. Kami menyediakan solusi estimasi kebutuhan bahan bangunan yang akurat, sehingga pengguna dapat mengontrol biaya dan mengurangi risiko kesalahan perhitungan.\n\nDengan menggabungkan teknologi perhitungan digital dan visualisasi 3D interaktif, RenovaSim memungkinkan pengguna tidak hanya menghitung kebutuhan material, tetapi juga melihat gambaran awal dari rumah impian mereka secara realistis. Pendekatan ini membantu dalam pengambilan keputusan yang lebih tepat sebelum proses pembangunan dimulai.\n\nRenovaSim dikembangkan untuk menjawab kebutuhan masyarakat modern yang menginginkan perencanaan pembangunan yang praktis, cepat, dan transparan. Baik untuk individu, kontraktor, maupun pengembang, platform ini hadir sebagai alat bantu yang andal dalam setiap tahap perencanaan.',
                               ),
                             ],
                           ),
@@ -226,7 +218,7 @@ class AboutUsScreen extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Text(
-                            '© 2025 RenovaSim. All rights reserved.',
+                            '© 2026 RenovaSim. All rights reserved.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 11,
