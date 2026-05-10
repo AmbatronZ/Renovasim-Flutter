@@ -4,18 +4,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'profile_screen.dart';
 import 'settings_screen.dart';
 import 'cs_screen.dart';
-
-// ─── Color Palette ───────────────────────────────────────────────────────────
-class AppColors {
-  static const techWhite = Color(0xFFF5F5F5);
-  static const zenGray = Color(0xFF747473);
-  static const coconutGreen = Color(0xFF8BA023);
-  static const thatchGreen = Color(0xFF3B411E);
-  static const metallicBlack = Color(0xFF2C2C2B);
-  static const white = Colors.white;
-}
-
-
+import '../../core/constants/app_colors.dart';
+import '../../data/models/project_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -42,9 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top nav bar
             _TopBar(parentContext: context),
-            // Scrollable content
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -52,13 +40,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 16),
-                    // Hero Banner
                     _HeroBanner(),
                     const SizedBox(height: 28),
-                    // Portfolio section
                     _PortfolioSection(),
                     const SizedBox(height: 24),
-                    // Budget Insight
                     _BudgetInsightCard(),
                     const SizedBox(height: 24),
                   ],
@@ -116,33 +101,23 @@ class _TopBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
       child: Row(
         children: [
-          SvgPicture.asset(
-            'assets/images/renovasim_logo.svg',
-            height: 32,
-          ),
+          SvgPicture.asset('assets/images/renovasim_logo.svg', height: 32),
           const Spacer(),
-            _IconBtn(
-              icon: Icons.notifications_outlined),
-                const SizedBox(width: 4),
-            _IconBtn(
-              icon: Icons.settings_outlined,
-              onTap: () {
-                Navigator.push(
-                  parentContext,
-                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                );
-              },
+          _IconBtn(icon: Icons.notifications_outlined),
+          const SizedBox(width: 4),
+          _IconBtn(
+            icon: Icons.settings_outlined,
+            onTap: () => Navigator.push(
+              parentContext,
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
             ),
+          ),
           _IconBtn(
             icon: Icons.person_outline_rounded,
-            onTap: () {
-              Navigator.push(
-                parentContext, // ← pakai parentContext
-                MaterialPageRoute(
-                  builder: (_) => const ProfileScreen(),
-                ),
-              );
-            },
+            onTap: () => Navigator.push(
+              parentContext,
+              MaterialPageRoute(builder: (_) => const ProfileScreen()),
+            ),
           ),
         ],
       ),
@@ -154,25 +129,18 @@ class _IconBtn extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;
 
-  const _IconBtn({
-    required this.icon,
-    this.onTap,
-  });
+  const _IconBtn({required this.icon, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.transparent, // penting
+      color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(10),
         child: Padding(
           padding: const EdgeInsets.all(8),
-          child: Icon(
-            icon,
-            size: 22,
-            color: AppColors.metallicBlack,
-          ),
+          child: Icon(icon, size: 22, color: AppColors.metallicBlack),
         ),
       ),
     );
@@ -193,24 +161,19 @@ class _HeroBanner extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Background image
               Image.asset(
                 'assets/images/background1.png',
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [
-                        AppColors.thatchGreen,
-                        AppColors.metallicBlack,
-                      ],
+                      colors: [AppColors.thatchGreen, AppColors.metallicBlack],
                     ),
                   ),
                 ),
               ),
-              // Dark overlay
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -223,7 +186,6 @@ class _HeroBanner extends StatelessWidget {
                   ),
                 ),
               ),
-              // Content
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -268,7 +230,6 @@ class _HeroBanner extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // CTA button
                     GestureDetector(
                       onTap: () {},
                       child: Container(
@@ -311,8 +272,8 @@ class _HeroBanner extends StatelessWidget {
 // ─── Portfolio Section ────────────────────────────────────────────────────────
 
 class _PortfolioSection extends StatelessWidget {
-  final List<_ProjectData> projects = const [
-    _ProjectData(
+  final List<ProjectModel> projects = const [
+    ProjectModel(
       title: 'Scandinavian Room',
       location: 'Jakarta, ID',
       budget: 'Rp 15.500.000',
@@ -320,7 +281,7 @@ class _PortfolioSection extends StatelessWidget {
       imagePath: 'assets/images/background3.png',
       isInProgress: true,
     ),
-    _ProjectData(
+    ProjectModel(
       title: 'Cozy Haze Kitchen',
       location: null,
       budget: 'Rp 4.250.000',
@@ -329,7 +290,7 @@ class _PortfolioSection extends StatelessWidget {
       isInProgress: false,
       draftInfo: '12 item',
     ),
-    _ProjectData(
+    ProjectModel(
       title: 'Minimalist Office',
       location: null,
       budget: 'Rp 8.900.000',
@@ -345,7 +306,6 @@ class _PortfolioSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section header
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
@@ -373,19 +333,14 @@ class _PortfolioSection extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Active Projects',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.metallicBlack,
-                          fontFamily: 'PPEditorialNew',
-                        ),
-                      ),
-                    ],
+                  Text(
+                    'Active Projects',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.metallicBlack,
+                      fontFamily: 'PPEditorialNew',
+                    ),
                   ),
                 ],
               ),
@@ -403,8 +358,6 @@ class _PortfolioSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-
-        // Project cards — vertical list
         ...projects.map((p) => Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
@@ -416,7 +369,7 @@ class _PortfolioSection extends StatelessWidget {
 }
 
 class _ProjectCard extends StatelessWidget {
-  final _ProjectData data;
+  final ProjectModel data;
   const _ProjectCard({required this.data});
 
   @override
@@ -428,15 +381,12 @@ class _ProjectCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Background image
             Image.asset(
               data.imagePath,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                color: AppColors.thatchGreen,
-              ),
+              errorBuilder: (_, __, ___) =>
+                  Container(color: AppColors.thatchGreen),
             ),
-            // Gradient overlay
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -450,30 +400,68 @@ class _ProjectCard extends StatelessWidget {
               ),
             ),
 
-            // Budget top-right
-            Positioned(
-              top: 12,
-              right: 12,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.92),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  data.budget,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.metallicBlack,
-                    fontFamily: 'PPNeueMontrealMedium',
+            // Budget card — non-progress
+            if (!data.isInProgress)
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.92),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    data.budget,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.metallicBlack,
+                      fontFamily: 'PPNeueMontrealMedium',
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            // Bottom content
+            // Total budget card — in-progress
+            if (data.isInProgress)
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.92),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'TOTAL BUDGET',
+                        style: TextStyle(
+                          fontSize: 8,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.zenGray,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                      Text(
+                        data.budget,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.metallicBlack,
+                          fontFamily: 'PPEditorialNew',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
             Positioned(
               left: 14,
               right: 14,
@@ -486,7 +474,6 @@ class _ProjectCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Status badge
                         if (data.status != null)
                           Container(
                             margin: const EdgeInsets.only(bottom: 6),
@@ -518,54 +505,35 @@ class _ProjectCard extends StatelessWidget {
                           ),
                         ),
                         if (data.location != null)
-                          Row(
-                            children: [
-                              const Icon(Icons.location_on_outlined,
-                                  size: 12, color: Colors.white70),
-                              const SizedBox(width: 3),
-                              Text(
-                                data.location!,
+                          Row(children: [
+                            const Icon(Icons.location_on_outlined,
+                                size: 12, color: Colors.white70),
+                            const SizedBox(width: 3),
+                            Text(data.location!,
                                 style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
-                          ),
+                                    fontSize: 11, color: Colors.white70)),
+                          ]),
                         if (data.draftInfo != null)
-                          Row(
-                            children: [
-                              const Icon(Icons.layers_outlined,
-                                  size: 12, color: Colors.white70),
-                              const SizedBox(width: 3),
-                              Text(
-                                data.draftInfo!,
+                          Row(children: [
+                            const Icon(Icons.layers_outlined,
+                                size: 12, color: Colors.white70),
+                            const SizedBox(width: 3),
+                            Text(data.draftInfo!,
                                 style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
-                          ),
+                                    fontSize: 11, color: Colors.white70)),
+                          ]),
                         if (data.updatedInfo != null)
-                          Row(
-                            children: [
-                              const Icon(Icons.access_time_rounded,
-                                  size: 12, color: Colors.white70),
-                              const SizedBox(width: 3),
-                              Text(
-                                data.updatedInfo!,
+                          Row(children: [
+                            const Icon(Icons.access_time_rounded,
+                                size: 12, color: Colors.white70),
+                            const SizedBox(width: 3),
+                            Text(data.updatedInfo!,
                                 style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
-                          ),
+                                    fontSize: 11, color: Colors.white70)),
+                          ]),
                       ],
                     ),
                   ),
-                  // Arrow button
                   if (data.isInProgress)
                     Container(
                       width: 36,
@@ -580,49 +548,6 @@ class _ProjectCard extends StatelessWidget {
                 ],
               ),
             ),
-
-            // TOTAL BUDGET label for in-progress card
-            if (data.isInProgress)
-              Positioned(
-                top: 12,
-                right: 12,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.92),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'TOTAL BUDGET',
-                            style: TextStyle(
-                              fontSize: 8,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.zenGray,
-                              letterSpacing: 0.8,
-                            ),
-                          ),
-                          Text(
-                            data.budget,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.metallicBlack,
-                              fontFamily: 'PPEditorialNew',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
           ],
         ),
       ),
@@ -662,30 +587,20 @@ class _BudgetInsightCard extends StatelessWidget {
                     color: AppColors.techWhite,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(
-                    Icons.trending_up_rounded,
-                    color: AppColors.coconutGreen,
-                    size: 20,
-                  ),
+                  child: const Icon(Icons.trending_up_rounded,
+                      color: AppColors.coconutGreen, size: 20),
                 ),
                 const Spacer(),
-                // Decorative camera/report icon
                 Container(
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
                     color: AppColors.techWhite,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.techWhite,
-                      width: 2,
-                    ),
+                    border: Border.all(color: AppColors.techWhite, width: 2),
                   ),
-                  child: Icon(
-                    Icons.camera_alt_outlined,
-                    color: AppColors.zenGray.withOpacity(0.4),
-                    size: 22,
-                  ),
+                  child: Icon(Icons.camera_alt_outlined,
+                      color: AppColors.zenGray.withOpacity(0.4), size: 22),
                 ),
               ],
             ),
@@ -708,23 +623,23 @@ class _BudgetInsightCard extends StatelessWidget {
                   height: 1.5,
                   fontFamily: 'PPNeueMontrealMedium',
                 ),
-                children: [
-                  const TextSpan(text: 'You saved '),
+                children: const [
+                  TextSpan(text: 'You saved '),
                   TextSpan(
                     text: '15%',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: AppColors.coconutGreen,
                     ),
                   ),
-                  const TextSpan(
-                      text:
-                          ' on materials this month through smart rendering selections.'),
+                  TextSpan(
+                    text:
+                        ' on materials this month through smart rendering selections.',
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-            // Divider
             const Divider(color: Color(0xFFEEEEEE)),
             const SizedBox(height: 14),
             Text(
@@ -748,7 +663,6 @@ class _BudgetInsightCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 18),
-            // Buttons
             Row(
               children: [
                 Expanded(
@@ -760,8 +674,7 @@ class _BudgetInsightCard extends StatelessWidget {
                           color: Color(0xFFDDDDDD), width: 1.5),
                       padding: const EdgeInsets.symmetric(vertical: 13),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(
                       'Export Report',
@@ -783,8 +696,7 @@ class _BudgetInsightCard extends StatelessWidget {
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 13),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(
                       'Manage Payments',
@@ -881,32 +793,10 @@ class _BottomNav extends StatelessWidget {
   }
 }
 
-// ─── Data Models ─────────────────────────────────────────────────────────────
+// ─── Nav Item Model ───────────────────────────────────────────────────────────
 
 class _NavItem {
   final IconData icon;
   final String label;
   const _NavItem({required this.icon, required this.label});
-}
-
-class _ProjectData {
-  final String title;
-  final String? location;
-  final String budget;
-  final String? status;
-  final String imagePath;
-  final bool isInProgress;
-  final String? draftInfo;
-  final String? updatedInfo;
-
-  const _ProjectData({
-    required this.title,
-    required this.location,
-    required this.budget,
-    required this.status,
-    required this.imagePath,
-    required this.isInProgress,
-    this.draftInfo,
-    this.updatedInfo,
-  });
 }

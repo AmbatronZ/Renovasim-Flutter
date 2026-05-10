@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'home_screen.dart';
+import '../../core/constants/app_colors.dart';
 
 class CsScreen extends StatefulWidget {
   const CsScreen({super.key});

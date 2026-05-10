@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'home_screen.dart';
+import '../../core/constants/app_colors.dart';
 
 class AboutUsScreen extends StatelessWidget {
   const AboutUsScreen({super.key});

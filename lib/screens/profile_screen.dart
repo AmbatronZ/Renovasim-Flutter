@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart'; // buat AppColors
+import '../../core/constants/app_colors.dart';// buat AppColors
 import 'profile_setting_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
