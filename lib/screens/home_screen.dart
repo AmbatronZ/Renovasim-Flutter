@@ -6,6 +6,7 @@ import 'settings_screen.dart';
 import 'cs_screen.dart';
 import '../../core/constants/app_colors.dart';
 import '../../data/models/project_model.dart';
+import 'notification_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -103,8 +104,17 @@ class _TopBar extends StatelessWidget {
         children: [
           SvgPicture.asset('assets/images/renovasim_logo.svg', height: 32),
           const Spacer(),
-          _IconBtn(icon: Icons.notifications_outlined),
-          const SizedBox(width: 4),
+          _IconBtn(
+            icon: Icons.notifications_outlined,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const NotificationScreen(),
+                ),
+              );
+            },
+          ),
           _IconBtn(
             icon: Icons.settings_outlined,
             onTap: () => Navigator.push(

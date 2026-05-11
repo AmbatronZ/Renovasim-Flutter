@@ -5,6 +5,9 @@ import 'login_screen.dart';
 import 'about_us_screen.dart';
 import 'help_support_screen.dart';
 import 'terms_conditions_screen.dart';
+import 'package:provider/provider.dart';
+import '../../core/theme_provider.dart';
+import 'notification_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -144,9 +147,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             _Divider(),
                             _SettingsTileSwitch(
                               label: 'Dark mode',
-                              value: _darkMode,
-                              onChanged: (v) =>
-                                  setState(() => _darkMode = v),
+                              value: Provider.of<ThemeProvider>(context).isDark,
+                              onChanged: (v) {
+                                Provider.of<ThemeProvider>(context, listen: false).toggleTheme(v);
+                              },  
                             ),
                           ],
                         ),

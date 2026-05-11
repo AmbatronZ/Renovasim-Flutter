@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';// buat AppColors
 import 'profile_setting_screen.dart';
+import 'notification_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -23,8 +24,14 @@ class ProfileScreen extends StatelessWidget {
         actions: [
         IconButton(
           icon: const Icon(Icons.notifications_outlined),
-          color: AppColors.metallicBlack,
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const NotificationScreen(),
+              ),
+            );
+          },  
         ),
         const SizedBox(width: 8),
       ],
