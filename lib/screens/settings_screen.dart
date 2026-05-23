@@ -145,12 +145,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   setState(() => _pushNotifications = v),
                             ),
                             _Divider(),
-                            _SettingsTileSwitch(
-                              label: 'Dark mode',
-                              value: Provider.of<ThemeProvider>(context).isDark,
-                              onChanged: (v) {
-                                Provider.of<ThemeProvider>(context, listen: false).toggleTheme(v);
-                              },  
+                            Consumer<ThemeProvider>(
+                              builder: (context, themeProvider, _) {
+                                return _SettingsTileSwitch(
+                                  label: 'Dark mode',
+                                  value: themeProvider.isDark,
+                                  onChanged: (v) {
+                                    themeProvider.toggleTheme(v);
+                                  },
+                                );
+                              },
                             ),
                           ],
                         ),

@@ -25,31 +25,33 @@ class RenovaSimApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context); // ← tambah ini
-
-    return MaterialApp(
-      title: 'RenovaSim',
-      debugShowCheckedModeBanner: false,
-      themeMode: themeProvider.themeMode, // ← tambah ini
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF8BA023),
-          primary: const Color(0xFF8BA023),
-        ),
-        fontFamily: 'PPNeueMontrealMedium',
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData.dark().copyWith( // ← tambah ini
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF8BA023),
-          primary: const Color(0xFF8BA023),
-          brightness: Brightness.dark,
-        ),
-        textTheme: ThemeData.dark().textTheme.apply(
-          fontFamily: 'PPNeueMontrealMedium',
-        ),
-      ),
-      home: const SplashScreen(),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          title: 'RenovaSim',
+          debugShowCheckedModeBanner: false,
+          themeMode: themeProvider.themeMode,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF8BA023),
+              primary: const Color(0xFF8BA023),
+            ),
+            fontFamily: 'PPNeueMontrealMedium',
+            useMaterial3: true,
+          ),
+          darkTheme: ThemeData.dark().copyWith(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF8BA023),
+              primary: const Color(0xFF8BA023),
+              brightness: Brightness.dark,
+            ),
+            textTheme: ThemeData.dark().textTheme.apply(
+              fontFamily: 'PPNeueMontrealMedium',
+            ),
+          ),
+          home: const SplashScreen(),
+        );
+      },
     );
   }
 }
