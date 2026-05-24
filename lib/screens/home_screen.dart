@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
     return Scaffold(
-      backgroundColor: AppColors.techWhite,
+      backgroundColor: AppColors.scaffoldBackground(context),
       body: SafeArea(
         child: Column(
           children: [
@@ -150,7 +150,7 @@ class _IconBtn extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         child: Padding(
           padding: const EdgeInsets.all(8),
-          child: Icon(icon, size: 22, color: AppColors.metallicBlack),
+          child: Icon(icon, size: 22, color: AppColors.textPrimary(context)),
         ),
       ),
     );

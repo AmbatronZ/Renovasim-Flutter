@@ -9,14 +9,14 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.techWhite,
+      backgroundColor: AppColors.scaffoldBackground(context),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           "Profile",
           style: TextStyle(
-            color: AppColors.metallicBlack,
+            color: AppColors.textPrimary(context),
             fontFamily: 'PPEditorialNew',
             fontWeight: FontWeight.w700,
           ),
@@ -111,17 +111,18 @@ class ProfileScreen extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
-        tileColor: Colors.white,
+        tileColor: AppColors.cardBackground(context),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12)),
-        leading: Icon(icon, color: AppColors.metallicBlack),
+        leading: Icon(icon, color: AppColors.textPrimary(context)),
         title: Text(
           title,
           style: TextStyle(
             fontFamily: 'PPNeueMontrealMedium',
+            color: AppColors.textPrimary(context),
           ),
         ),
-        trailing: Icon(Icons.arrow_forward_ios, size: 14),
+        trailing: Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.textSecondary(context)),
         onTap: onTap,
       ),
     );

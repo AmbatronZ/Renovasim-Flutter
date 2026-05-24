@@ -111,7 +111,7 @@ class _CsScreenState extends State<CsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.scaffoldBackground(context),
       body: SafeArea(
         child: Column(
           children: [

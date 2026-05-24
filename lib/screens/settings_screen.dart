@@ -23,7 +23,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.techWhite,
+      backgroundColor: AppColors.scaffoldBackground(context),
       body: Stack(
         children: [
           // ─── Green header background ─────────────────────────────
@@ -74,12 +74,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 14),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.cardBackground(context),
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.metallicBlack
-                                    .withOpacity(0.07),
+                                color: AppColors.shadowColor(context),
                                 blurRadius: 14,
                                 offset: const Offset(0, 4),
                               ),
@@ -101,7 +100,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.metallicBlack,
+                                    color: AppColors.textPrimary(context),
                                     fontFamily: 'PPEditorialNew',
                                   ),
                                 ),
@@ -261,7 +260,7 @@ class _SectionLabel extends StatelessWidget {
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w500,
-          color: AppColors.zenGray,
+          color: AppColors.textSecondary(context),
           fontFamily: 'PPNeueMontrealMedium',
         ),
       ),
@@ -278,11 +277,11 @@ class _SettingsCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground(context),
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: AppColors.metallicBlack.withOpacity(0.05),
+            color: AppColors.shadowColor(context),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -314,12 +313,12 @@ class _SettingsTile extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 14,
-                color: AppColors.metallicBlack,
+                color: AppColors.textPrimary(context),
                 fontFamily: 'PPNeueMontrealMedium',
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
-                color: AppColors.zenGray, size: 20),
+            Icon(Icons.chevron_right_rounded,
+                color: AppColors.textSecondary(context), size: 20),
           ],
         ),
       ),
@@ -349,7 +348,7 @@ class _SettingsTileSwitch extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 14,
-              color: AppColors.metallicBlack,
+              color: AppColors.textPrimary(context),
               fontFamily: 'PPNeueMontrealMedium',
             ),
           ),
@@ -359,7 +358,7 @@ class _SettingsTileSwitch extends StatelessWidget {
             activeColor: Colors.white,
             activeTrackColor: AppColors.coconutGreen,
             inactiveThumbColor: Colors.white,
-            inactiveTrackColor: AppColors.zenGray.withOpacity(0.3),
+            inactiveTrackColor: AppColors.textSecondary(context).withOpacity(0.3),
           ),
         ],
       ),
@@ -370,12 +369,12 @@ class _SettingsTileSwitch extends StatelessWidget {
 class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Divider(
+    return Divider(
       height: 1,
       thickness: 1,
       indent: 16,
       endIndent: 16,
-      color: Color(0xFFF0F0F0),
+      color: AppColors.dividerColor(context),
     );
   }
 }

@@ -39,7 +39,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.techWhite,
+      backgroundColor: AppColors.scaffoldBackground(context),
       body: Stack(
         children: [
           // ─── Green header background ───────────────────────────

@@ -32,22 +32,28 @@ class RenovaSimApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           themeMode: themeProvider.themeMode,
           theme: ThemeData(
+            useMaterial3: true,
+            brightness: Brightness.light,
+            scaffoldBackgroundColor: const Color(0xFFF5F5F5),
             colorScheme: ColorScheme.fromSeed(
               seedColor: const Color(0xFF8BA023),
               primary: const Color(0xFF8BA023),
+              surface: const Color(0xFFF5F5F5),
+              brightness: Brightness.light,
             ),
             fontFamily: 'PPNeueMontrealMedium',
-            useMaterial3: true,
           ),
-          darkTheme: ThemeData.dark().copyWith(
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            brightness: Brightness.dark,
+            scaffoldBackgroundColor: const Color(0xFF1E1E1E),
             colorScheme: ColorScheme.fromSeed(
               seedColor: const Color(0xFF8BA023),
               primary: const Color(0xFF8BA023),
+              surface: const Color(0xFF1E1E1E),
               brightness: Brightness.dark,
             ),
-            textTheme: ThemeData.dark().textTheme.apply(
-              fontFamily: 'PPNeueMontrealMedium',
-            ),
+            fontFamily: 'PPNeueMontrealMedium',
           ),
           home: const SplashScreen(),
         );
