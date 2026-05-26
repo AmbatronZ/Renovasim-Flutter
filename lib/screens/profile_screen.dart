@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';// buat AppColors
 import 'profile_setting_screen.dart';
 import 'notification_screen.dart';
+import 'plan_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -96,7 +97,13 @@ class ProfileScreen extends StatelessWidget {
             }),
 
             _menuItem(context, "Library Design", Icons.book, () {}),
-            _menuItem(context, "Face ID / Touch ID", Icons.lock, () {}),
+            _menuItem(context, "Plan", Icons.map_outlined, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const PlanScreen()),
+              );
+            }),
             _menuItem(context, "Two-Factor Authentication",
                 Icons.security, () {}),
             _menuItem(context, "Log out", Icons.logout, () {}),

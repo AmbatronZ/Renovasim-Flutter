@@ -135,9 +135,9 @@ class _CsScreenState extends State<CsScreen>
   Widget _buildTopBar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFF0F0F0))),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground(context),
+        border: Border(bottom: BorderSide(color: AppColors.dividerColor(context))),
       ),
       child: Row(
         children: [
@@ -151,7 +151,7 @@ class _CsScreenState extends State<CsScreen>
                 margin: const EdgeInsets.only(right: 4),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.grey[300],
+                  color: AppColors.textSecondary(context).withOpacity(0.3),
                 ),
               ),
             ),
@@ -165,7 +165,7 @@ class _CsScreenState extends State<CsScreen>
                 'Status: ',
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.grey[500],
+                  color: AppColors.textSecondary(context),
                   fontFamily: 'PPNeueMontrealMedium',
                 ),
               ),
@@ -188,7 +188,7 @@ class _CsScreenState extends State<CsScreen>
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Icon(Icons.close_rounded,
-                size: 20, color: Colors.grey[500]),
+                size: 20, color: AppColors.textSecondary(context)),
           ),
         ],
       ),
@@ -220,12 +220,12 @@ class _CsScreenState extends State<CsScreen>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                      color: Colors.grey[200]!, width: 2),
+                      color: AppColors.textSecondary(context).withOpacity(0.3), width: 2),
                 ),
                 child: Icon(
                   Icons.home_outlined,
                   size: 36,
-                  color: AppColors.metallicBlack,
+                  color: AppColors.textPrimary(context),
                 ),
               ),
             ],
@@ -238,7 +238,7 @@ class _CsScreenState extends State<CsScreen>
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.metallicBlack,
+            color: AppColors.textPrimary(context),
             height: 1.5,
             fontFamily: 'PPEditorialNew',
           ),
@@ -262,7 +262,7 @@ class _CsScreenState extends State<CsScreen>
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: AppColors.metallicBlack,
+                  color: AppColors.coconutGreen,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.home_rounded,
@@ -277,7 +277,7 @@ class _CsScreenState extends State<CsScreen>
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.metallicBlack,
+                      color: AppColors.textPrimary(context),
                       fontFamily: 'PPEditorialNew',
                     ),
                   ),
@@ -285,7 +285,7 @@ class _CsScreenState extends State<CsScreen>
                     _csAgent,
                     style: TextStyle(
                       fontSize: 11,
-                      color: AppColors.zenGray,
+                      color: AppColors.textSecondary(context),
                       fontFamily: 'PPNeueMontrealMedium',
                     ),
                   ),
@@ -295,7 +295,7 @@ class _CsScreenState extends State<CsScreen>
           ),
         ),
 
-        const Divider(height: 1, color: Color(0xFFF0F0F0)),
+        Divider(height: 1, color: AppColors.dividerColor(context)),
 
         // Messages
         Expanded(
@@ -330,7 +330,7 @@ class _CsScreenState extends State<CsScreen>
               msg.time,
               style: TextStyle(
                 fontSize: 10,
-                color: Colors.grey[400],
+                color: AppColors.textSecondary(context),
                 fontFamily: 'PPNeueMontrealMedium',
               ),
             ),
@@ -345,7 +345,7 @@ class _CsScreenState extends State<CsScreen>
             decoration: BoxDecoration(
               color: msg.isUser
                   ? AppColors.coconutGreen
-                  : const Color(0xFFEEEEEE),
+                  : AppColors.cardBackground(context),
               borderRadius: BorderRadius.only(
                 topLeft: const Radius.circular(16),
                 topRight: const Radius.circular(16),
@@ -359,7 +359,7 @@ class _CsScreenState extends State<CsScreen>
                 fontSize: 13,
                 color: msg.isUser
                     ? Colors.white
-                    : AppColors.metallicBlack,
+                    : AppColors.textPrimary(context),
                 height: 1.4,
                 fontFamily: 'PPNeueMontrealMedium',
               ),
@@ -379,7 +379,7 @@ class _CsScreenState extends State<CsScreen>
             padding: const EdgeInsets.symmetric(
                 horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFFEEEEEE),
+              color: AppColors.cardBackground(context),
               borderRadius: BorderRadius.circular(16),
             ),
             child: _TypingDots(),
@@ -393,19 +393,19 @@ class _CsScreenState extends State<CsScreen>
   Widget _buildInputBar() {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFF0F0F0))),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground(context),
+        border: Border(top: BorderSide(color: AppColors.dividerColor(context))),
       ),
       child: Row(
         children: [
           // Three dots
           Icon(Icons.more_horiz_rounded,
-              color: Colors.grey[400], size: 22),
+              color: AppColors.textSecondary(context), size: 22),
           const SizedBox(width: 8),
 
           // Mic
-          Icon(Icons.mic_outlined, color: Colors.grey[400], size: 22),
+          Icon(Icons.mic_outlined, color: AppColors.textSecondary(context), size: 22),
           const SizedBox(width: 8),
 
           // Text field
@@ -414,16 +414,16 @@ class _CsScreenState extends State<CsScreen>
               padding: const EdgeInsets.symmetric(
                   horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F5F5),
+                color: AppColors.scaffoldBackground(context),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: TextField(
                 controller: _inputCtrl,
-                style: const TextStyle(fontSize: 13),
-                decoration: const InputDecoration(
+                style: TextStyle(fontSize: 13, color: AppColors.textPrimary(context)),
+                decoration: InputDecoration(
                   hintText: 'Type here...',
                   hintStyle: TextStyle(
-                      fontSize: 13, color: Color(0xFFBDBDBD)),
+                      fontSize: 13, color: AppColors.textSecondary(context).withOpacity(0.5)),
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.zero,

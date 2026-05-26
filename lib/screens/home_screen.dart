@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'profile_screen.dart';
 import 'settings_screen.dart';
 import 'cs_screen.dart';
+import 'dashboard_screen.dart';
 import '../../core/constants/app_colors.dart';
 import '../../data/models/project_model.dart';
 import 'notification_screen.dart';
@@ -22,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _NavItem(icon: Icons.folder_copy_rounded, label: 'Projects'),
     _NavItem(icon: Icons.auto_awesome_rounded, label: 'AI Create'),
     _NavItem(icon: Icons.map_outlined, label: 'Plan'),
-    _NavItem(icon: Icons.settings_rounded, label: 'Config'),
+    _NavItem(icon: Icons.dashboard_rounded, label: 'Dashboard'),
   ];
 
   @override
@@ -57,7 +58,17 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: _BottomNav(
         items: _navItems,
         selectedIndex: _selectedNav,
-        onTap: (i) => setState(() => _selectedNav = i),
+        onTap: (i) {
+          if (i == 3) {
+            // Navigate to Dashboard
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const DashboardScreen()),
+            );
+          } else {
+            setState(() => _selectedNav = i);
+          }
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -348,7 +359,7 @@ class _PortfolioSection extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.metallicBlack,
+                      color: AppColors.textPrimary(context),
                       fontFamily: 'PPEditorialNew',
                     ),
                   ),
@@ -359,7 +370,7 @@ class _PortfolioSection extends StatelessWidget {
                 'Managing 3 active renovations with real-time\nbudget tracking.',
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.zenGray,
+                  color: AppColors.textSecondary(context),
                   height: 1.5,
                   fontFamily: 'PPNeueMontrealMedium',
                 ),
@@ -427,7 +438,7 @@ class _ProjectCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.metallicBlack,
+                      color: AppColors.textPrimary(context),
                       fontFamily: 'PPNeueMontrealMedium',
                     ),
                   ),
@@ -454,7 +465,7 @@ class _ProjectCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 8,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.zenGray,
+                          color: AppColors.textSecondary(context),
                           letterSpacing: 0.8,
                         ),
                       ),
@@ -463,7 +474,7 @@ class _ProjectCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.metallicBlack,
+                          color: AppColors.textPrimary(context),
                           fontFamily: 'PPEditorialNew',
                         ),
                       ),
@@ -575,11 +586,11 @@ class _BudgetInsightCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.cardBackground(context),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: AppColors.metallicBlack.withOpacity(0.06),
+              color: AppColors.shadowColor(context),
               blurRadius: 20,
               offset: const Offset(0, 4),
             ),
@@ -610,7 +621,7 @@ class _BudgetInsightCard extends StatelessWidget {
                     border: Border.all(color: AppColors.techWhite, width: 2),
                   ),
                   child: Icon(Icons.camera_alt_outlined,
-                      color: AppColors.zenGray.withOpacity(0.4), size: 22),
+                      color: AppColors.textSecondary(context).withOpacity(0.4), size: 22),
                 ),
               ],
             ),
@@ -620,7 +631,7 @@ class _BudgetInsightCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
-                color: AppColors.metallicBlack,
+                color: AppColors.textPrimary(context),
                 fontFamily: 'PPEditorialNew',
               ),
             ),
@@ -629,7 +640,7 @@ class _BudgetInsightCard extends StatelessWidget {
               text: TextSpan(
                 style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.zenGray,
+                  color: AppColors.textSecondary(context),
                   height: 1.5,
                   fontFamily: 'PPNeueMontrealMedium',
                 ),
@@ -650,14 +661,14 @@ class _BudgetInsightCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            const Divider(color: Color(0xFFEEEEEE)),
+            Divider(color: AppColors.dividerColor(context)),
             const SizedBox(height: 14),
             Text(
               'TOTAL PORTFOLIO VALUATION',
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
-                color: AppColors.zenGray,
+                color: AppColors.textSecondary(context),
                 letterSpacing: 1.2,
                 fontFamily: 'PPNeueMontrealMedium',
               ),
@@ -679,9 +690,9 @@ class _BudgetInsightCard extends StatelessWidget {
                   child: OutlinedButton(
                     onPressed: () {},
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.metallicBlack,
-                      side: const BorderSide(
-                          color: Color(0xFFDDDDDD), width: 1.5),
+                      foregroundColor: AppColors.textPrimary(context),
+                      side: BorderSide(
+                          color: AppColors.textSecondary(context).withOpacity(0.2), width: 1.5),
                       padding: const EdgeInsets.symmetric(vertical: 13),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
@@ -744,10 +755,10 @@ class _BottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground(context),
         boxShadow: [
           BoxShadow(
-            color: AppColors.metallicBlack.withOpacity(0.08),
+            color: AppColors.shadowColor(context),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -775,7 +786,7 @@ class _BottomNav extends StatelessWidget {
                         size: 22,
                         color: selected
                             ? AppColors.coconutGreen
-                            : AppColors.zenGray,
+                            : AppColors.textSecondary(context),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -787,7 +798,7 @@ class _BottomNav extends StatelessWidget {
                               : FontWeight.w400,
                           color: selected
                               ? AppColors.coconutGreen
-                              : AppColors.zenGray,
+                              : AppColors.textSecondary(context),
                           fontFamily: 'PPNeueMontrealMedium',
                         ),
                       ),
