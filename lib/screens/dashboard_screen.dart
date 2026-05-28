@@ -15,7 +15,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final List<_NavItem> _navItems = const [
     _NavItem(icon: Icons.folder_copy_rounded, label: 'Projects'),
     _NavItem(icon: Icons.auto_awesome_rounded, label: 'AI Create'),
-    _NavItem(icon: Icons.map_outlined, label: 'Plan'),
+    _NavItem(icon: Icons.view_in_ar_rounded, label: '3D Design'),
     _NavItem(icon: Icons.dashboard_rounded, label: 'Dashboard'),
   ];
 

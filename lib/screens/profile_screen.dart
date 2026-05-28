@@ -3,6 +3,8 @@ import '../../core/constants/app_colors.dart';// buat AppColors
 import 'profile_setting_screen.dart';
 import 'notification_screen.dart';
 import 'plan_screen.dart';
+import 'dashboard_screen.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -96,7 +98,13 @@ class ProfileScreen extends StatelessWidget {
               );
             }),
 
-            _menuItem(context, "Library Design", Icons.book, () {}),
+            _menuItem(context, "Library Dashboard", Icons.book, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const DashboardScreen()),
+              );
+            }),
             _menuItem(context, "Plan", Icons.map_outlined, () {
               Navigator.push(
                 context,
@@ -106,7 +114,13 @@ class ProfileScreen extends StatelessWidget {
             }),
             _menuItem(context, "Two-Factor Authentication",
                 Icons.security, () {}),
-            _menuItem(context, "Log out", Icons.logout, () {}),
+            _menuItem(context, "Log out", Icons.logout, () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const LoginScreen()),
+              );
+            }),
           ],
         ),
       ),

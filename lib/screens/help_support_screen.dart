@@ -512,7 +512,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: AppColors.zenGray,
+                                  color: AppColors.textSecondary(context),
                                   fontFamily: 'PPNeueMontrealMedium',
                                 ),
                               ),
@@ -545,11 +545,11 @@ class _ContentCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.metallicBlack.withOpacity(0.05),
+            color: AppColors.shadowColor(context),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -571,7 +571,7 @@ class _SectionTitle extends StatelessWidget {
       style: TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.w800,
-        color: AppColors.metallicBlack,
+        color: AppColors.textPrimary(context),
         fontFamily: 'PPEditorialNew',
       ),
     );
@@ -588,7 +588,7 @@ class _BodyText extends StatelessWidget {
       text,
       style: TextStyle(
         fontSize: 13,
-        color: AppColors.zenGray,
+        color: AppColors.textSecondary(context),
         height: 1.7,
         fontFamily: 'PPNeueMontrealMedium',
       ),

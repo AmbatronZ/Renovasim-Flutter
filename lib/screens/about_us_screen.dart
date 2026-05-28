@@ -51,12 +51,12 @@ class AboutUsScreen extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               vertical: 28, horizontal: 24),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.cardBackground(context),
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
                                 color:
-                                    AppColors.metallicBlack.withOpacity(0.07),
+                                    AppColors.shadowColor(context),
                                 blurRadius: 16,
                                 offset: const Offset(0, 4),
                               ),
@@ -73,7 +73,7 @@ class AboutUsScreen extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 26,
                                     fontWeight: FontWeight.w800,
-                                    color: AppColors.metallicBlack,
+                                    color: AppColors.textPrimary(context),
                                     fontFamily: 'PPEditorialNew',
                                   ),
                                 ),
@@ -146,7 +146,7 @@ class AboutUsScreen extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: AppColors.techWhite,
+                                  color: AppColors.scaffoldBackground(context),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
                                     color: AppColors.coconutGreen.withOpacity(0.2),
@@ -222,7 +222,7 @@ class AboutUsScreen extends StatelessWidget {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 11,
-                              color: AppColors.zenGray,
+                              color: AppColors.textSecondary(context),
                               fontFamily: 'PPNeueMontrealMedium',
                             ),
                           ),
@@ -254,11 +254,11 @@ class _ContentCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.cardBackground(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.metallicBlack.withOpacity(0.05),
+            color: AppColors.shadowColor(context),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -280,7 +280,7 @@ class _SectionTitle extends StatelessWidget {
       style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w800,
-        color: AppColors.metallicBlack,
+        color: AppColors.textPrimary(context),
         fontFamily: 'PPEditorialNew',
       ),
     );
@@ -297,7 +297,7 @@ class _BodyText extends StatelessWidget {
       text,
       style: TextStyle(
         fontSize: 13,
-        color: AppColors.zenGray,
+        color: AppColors.textSecondary(context),
         height: 1.7,
         fontFamily: 'PPNeueMontrealMedium',
       ),
@@ -340,7 +340,7 @@ class _MisiItem extends StatelessWidget {
                 text,
                 style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.metallicBlack,
+                  color: AppColors.textPrimary(context),
                   height: 1.5,
                   fontFamily: 'PPNeueMontrealMedium',
                 ),

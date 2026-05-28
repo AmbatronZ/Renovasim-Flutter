@@ -7,7 +7,7 @@ class TermsConditionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.techWhite,
+      backgroundColor: AppColors.scaffoldBackground(context),
       body: Stack(
         children: [
           // ─── Green header background ───────────────────────────
@@ -52,11 +52,11 @@ class TermsConditionsScreen extends StatelessWidget {
                           margin: const EdgeInsets.symmetric(horizontal: 20),
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.cardBackground(context),
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.metallicBlack.withOpacity(0.07),
+                                color: AppColors.shadowColor(context),
                                 blurRadius: 16,
                                 offset: const Offset(0, 4),
                               ),
@@ -86,7 +86,7 @@ class TermsConditionsScreen extends StatelessWidget {
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w800,
-                                        color: AppColors.metallicBlack,
+                                        color: AppColors.textPrimary(context),
                                         fontFamily: 'PPEditorialNew',
                                       ),
                                     ),
@@ -94,7 +94,7 @@ class TermsConditionsScreen extends StatelessWidget {
                                       'Terakhir diperbarui: 2025',
                                       style: TextStyle(
                                         fontSize: 12,
-                                        color: AppColors.zenGray,
+                                        color: AppColors.textSecondary(context),
                                         fontFamily: 'PPNeueMontrealMedium',
                                       ),
                                     ),
@@ -112,11 +112,11 @@ class TermsConditionsScreen extends StatelessWidget {
                           margin: const EdgeInsets.symmetric(horizontal: 20),
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.cardBackground(context),
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.metallicBlack.withOpacity(0.05),
+                                color: AppColors.shadowColor(context),
                                 blurRadius: 10,
                                 offset: const Offset(0, 2),
                               ),
@@ -150,7 +150,7 @@ class TermsConditionsScreen extends StatelessWidget {
                             'Website: www.renovasim.com',
                             style: TextStyle(
                               fontSize: 13,
-                              color: AppColors.zenGray,
+                              color: AppColors.textSecondary(context),
                               height: 1.8,
                               fontFamily: 'PPNeueMontrealMedium',
                             ),
@@ -169,7 +169,7 @@ class TermsConditionsScreen extends StatelessWidget {
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 11,
-                                color: AppColors.zenGray,
+                                color: AppColors.textSecondary(context),
                                 fontFamily: 'PPNeueMontrealMedium',
                               ),
                             ),

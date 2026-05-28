@@ -8,6 +8,7 @@ import 'dashboard_screen.dart';
 import '../../core/constants/app_colors.dart';
 import '../../data/models/project_model.dart';
 import 'notification_screen.dart';
+import 'ai_create_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<_NavItem> _navItems = const [
     _NavItem(icon: Icons.folder_copy_rounded, label: 'Projects'),
     _NavItem(icon: Icons.auto_awesome_rounded, label: 'AI Create'),
-    _NavItem(icon: Icons.map_outlined, label: 'Plan'),
+    _NavItem(icon: Icons.view_in_ar_rounded, label: '3D Design'),
     _NavItem(icon: Icons.dashboard_rounded, label: 'Dashboard'),
   ];
 
@@ -59,7 +60,13 @@ class _HomeScreenState extends State<HomeScreen> {
         items: _navItems,
         selectedIndex: _selectedNav,
         onTap: (i) {
-          if (i == 3) {
+          if (i == 1) {
+            // Navigate to AI Create
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AiCreateScreen()),
+            );
+          } else if (i == 3) {
             // Navigate to Dashboard
             Navigator.push(
               context,
