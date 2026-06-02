@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'register_screen.dart';
 import 'error_screen.dart';
 import 'home_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../core/theme_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -295,8 +297,9 @@ class _RenovaSimLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDark;
     return SvgPicture.asset(
-      'assets/images/renovasim_logo.svg',
+      isDark ? 'assets/images/renovasim_new.svg' : 'assets/images/renovasim_new2.svg',
       height: 32,
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/theme_provider.dart';
 
 class AboutUsScreen extends StatelessWidget {
   const AboutUsScreen({super.key});
@@ -65,18 +67,23 @@ class AboutUsScreen extends StatelessWidget {
                           child: Column(
                             children: [
                               // Logo
-                              SvgPicture.asset(
-                                'assets/images/renovasim_logo.svg',
-                                height: 40,
-                                placeholderBuilder: (_) => Text(
-                                  'RenovaSim',
-                                  style: TextStyle(
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.textPrimary(context),
-                                    fontFamily: 'PPEditorialNew',
-                                  ),
-                                ),
+                              Builder(
+                                builder: (context) {
+                                  final isDark = context.watch<ThemeProvider>().isDark;
+                                  return SvgPicture.asset(
+                                    isDark ? 'assets/images/renovasim_new.svg' : 'assets/images/renovasim_new2.svg',
+                                    height: 40,
+                                    placeholderBuilder: (_) => Text(
+                                      'RenovaSim',
+                                      style: TextStyle(
+                                        fontSize: 26,
+                                        fontWeight: FontWeight.w800,
+                                        color: AppColors.textPrimary(context),
+                                        fontFamily: 'PPEditorialNew',
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                               const SizedBox(height: 12),
                               Container(

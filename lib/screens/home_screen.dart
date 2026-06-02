@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'profile_screen.dart';
 import 'settings_screen.dart';
 import 'cs_screen.dart';
 import 'dashboard_screen.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/theme_provider.dart';
 import '../../data/models/project_model.dart';
 import 'notification_screen.dart';
 import 'ai_create_screen.dart';
+import '3D_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -61,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedIndex: _selectedNav,
         onTap: (i) {
           if (i == 1) {
-            // Navigate to AI Create
+            // Navigate to AI Create (for both AI Create and 3D Design)
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const AiCreateScreen()),
@@ -72,7 +76,13 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               MaterialPageRoute(builder: (_) => const DashboardScreen()),
             );
-          } else {
+          } else if (i == 2) {
+            // Navigate to 3D Design
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const T3DScreen()),
+            );
+          }  else {
             setState(() => _selectedNav = i);
           }
         },
@@ -116,11 +126,15 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDark;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
       child: Row(
         children: [
-          SvgPicture.asset('assets/images/renovasim_logo.svg', height: 32),
+          SvgPicture.asset(
+            isDark ? 'assets/images/renovasim_new.svg' : 'assets/images/renovasim_new2.svg',
+            height: 32,
+          ),
           const Spacer(),
           _IconBtn(
             icon: Icons.notifications_outlined,
