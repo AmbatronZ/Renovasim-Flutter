@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import 'home_screen.dart';
-import 'ai_create_screen.dart';
 import '3D_screen.dart';
 import 'rai_estimasi_screen.dart';
 import 'rai_hasil_screen.dart';
@@ -15,11 +14,10 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _selectedNav = 3; // Start with Dashboard selected
+  int _selectedNav = 2; // Start with Dashboard selected
 
   final List<_NavItem> _navItems = const [
     _NavItem(icon: Icons.folder_copy_rounded, label: 'Projects'),
-    _NavItem(icon: Icons.auto_awesome_rounded, label: 'AI Create'),
     _NavItem(icon: Icons.view_in_ar_rounded, label: '3D Design'),
     _NavItem(icon: Icons.dashboard_rounded, label: 'Dashboard'),
   ];
@@ -62,14 +60,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           } else if (i == 1) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const AiCreateScreen()),
-            );
-          } else if (i == 2) {
-            Navigator.pushReplacement(
-              context,
               MaterialPageRoute(builder: (_) => const T3DScreen()),
             );
-          } else if (i == 3) {
+          } else if (i == 2) {
             // Already on Dashboard screen
           }
         },

@@ -4,7 +4,6 @@ import '../../core/constants/app_colors.dart';
 import '../../core/theme_provider.dart';
 import 'home_screen.dart';
 import 'dashboard_screen.dart';
-import 'ai_create_screen.dart';
 
 class T3DScreen extends StatefulWidget {
   const T3DScreen({super.key});
@@ -15,11 +14,10 @@ class T3DScreen extends StatefulWidget {
 
 class _3DScreenState extends State<T3DScreen> {
   String _selectedStyle = 'Modern Scandinavian';
-  int _selectedNav = 2;
+  int _selectedNav = 1;
 
   final List<_NavItem> _navItems = const [
     _NavItem(icon: Icons.folder_copy_rounded, label: 'Projects'),
-    _NavItem(icon: Icons.auto_awesome_rounded, label: 'AI Create'),
     _NavItem(icon: Icons.view_in_ar_rounded, label: '3D Design'),
     _NavItem(icon: Icons.dashboard_rounded, label: 'Dashboard'),
   ];
@@ -284,24 +282,9 @@ class _3DScreenState extends State<T3DScreen> {
             // Navigate back to Home/Projects
             Navigator.popUntil(context, (route) => route.isFirst);
           } else if (i == 1) {
-              Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const AiCreateScreen()),
-            );
+            // Already on 3D Design
             setState(() => _selectedNav = 1);
           } else if (i == 2) {
-            // Navigate to 3D Design
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const T3DScreen()),
-            );
-          } else if (i == 3) {
-            // Navigate to Dashboard
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const DashboardScreen()),
-            );
-          } else if (i == 3) {
             // Navigate to Dashboard
             Navigator.pushReplacement(
               context,

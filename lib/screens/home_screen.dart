@@ -12,7 +12,6 @@ import '../../core/providers/project_provider.dart';
 import '../../core/providers/user_session_provider.dart';
 import '../../data/models/project_model.dart';
 import 'notification_screen.dart';
-import 'ai_create_screen.dart';
 import '3D_screen.dart';
 
 
@@ -28,7 +27,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<_NavItem> _navItems = const [
     _NavItem(icon: Icons.folder_copy_rounded, label: 'Projects'),
-    _NavItem(icon: Icons.auto_awesome_rounded, label: 'AI Create'),
     _NavItem(icon: Icons.view_in_ar_rounded, label: '3D Design'),
     _NavItem(icon: Icons.dashboard_rounded, label: 'Dashboard'),
   ];
@@ -67,24 +65,18 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedIndex: _selectedNav,
         onTap: (i) {
           if (i == 1) {
-            // Navigate to AI Create (for both AI Create and 3D Design)
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AiCreateScreen()),
-            );
-          } else if (i == 3) {
-            // Navigate to Dashboard
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const DashboardScreen()),
-            );
-          } else if (i == 2) {
             // Navigate to 3D Design
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const T3DScreen()),
             );
-          }  else {
+          } else if (i == 2) {
+            // Navigate to Dashboard
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const DashboardScreen()),
+            );
+          } else {
             setState(() => _selectedNav = i);
           }
         },
