@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import 'home_screen.dart';
+import 'ai_create_screen.dart';
+import '3D_screen.dart';
+import 'rai_estimasi_screen.dart';
+import 'rai_hasil_screen.dart';
+
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -53,13 +58,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
         selectedIndex: _selectedNav,
         onTap: (i) {
           if (i == 0) {
-            // Navigate to HomeScreen
+            Navigator.popUntil(context, (route) => route.isFirst);
+          } else if (i == 1) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
+              MaterialPageRoute(builder: (_) => const AiCreateScreen()),
             );
-          } else {
-            setState(() => _selectedNav = i);
+          } else if (i == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const T3DScreen()),
+            );
+          } else if (i == 3) {
+            // Already on Dashboard screen
           }
         },
       ),
@@ -407,7 +418,17 @@ class _RaiBanner extends StatelessWidget {
             Row(
               children: [
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const RaiEstimasiScreen(
+                          projectName: null,
+                          location: null,
+                        ),
+                      ),
+                    );
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 18, vertical: 12),
@@ -671,7 +692,17 @@ class _EstimateRow extends StatelessWidget {
               ),
               // View button
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    parentContext,
+                    MaterialPageRoute(
+                      builder: (_) => RaiHasilScreen(
+                        projectName: item.name,
+                        location: 'Surabaya',
+                      ),
+                    ),
+                  );
+                },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 12, vertical: 6),
