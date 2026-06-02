@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'login_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/theme_provider.dart';
+import '../core/constants/app_colors.dart';
+import '../core/theme_provider.dart';
+import '../core/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -13,17 +14,16 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final _firstNameCtrl = TextEditingController(text: 'Rusdi');
-  final _lastNameCtrl = TextEditingController(text: 'Ambalan');
-  final _emailCtrl =
-      TextEditingController(text: 'rusdi01gaming@gmail.com');
-  final _dobCtrl = TextEditingController(text: '18/03/2000');
-  final _phoneCtrl = TextEditingController(text: '823 - 3042 - 7191');
-  final _passCtrl = TextEditingController(text: '••••••••');
+  final _firstNameCtrl = TextEditingController();
+  final _lastNameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _dobCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
   bool _obscurePass = true;
   bool _isLoading = false;
-  String _selectedCountryCode = '+62';
-  String _selectedFlag = '🇮🇩';
+  final String _selectedCountryCode = '+62';
+  final String _selectedFlag = '🇮🇩';
 
   @override
   void dispose() {
@@ -37,17 +37,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
+    final email = _emailCtrl.text.trim();
+    final password = _passCtrl.text.trim();
+    final firstName = _firstNameCtrl.text.trim();
+    final lastName = _lastNameCtrl.text.trim();
+
+    if (email.isEmpty || password.isEmpty || firstName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nama, email, dan password wajib diisi.')),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-    // TODO: handle registration success
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Registration successful! Please log in.'),
-        backgroundColor: Color(0xFF2563EB),
-      ),
-    );
+    try {
+      await AuthService.signUp(
+        email: email,
+        password: password,
+        data: {
+          'first_name': firstName,
+          'last_name': lastName,
+          'phone': '$_selectedCountryCode${_phoneCtrl.text.trim()}',
+          'date_of_birth': _dobCtrl.text.trim(),
+        },
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registrasi berhasil! Silakan cek email untuk verifikasi.'),
+          backgroundColor: Color(0xFF2563EB),
+        ),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Terjadi kesalahan. Coba lagi.')),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override

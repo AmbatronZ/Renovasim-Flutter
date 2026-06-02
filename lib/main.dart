@@ -3,6 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'screens/splash_screen.dart';
 import 'core/theme_provider.dart';
+import 'core/providers/user_session_provider.dart';
+import 'core/providers/project_provider.dart';
+import 'core/providers/room_provider.dart';
+import 'core/providers/material_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,8 +17,14 @@ void main() {
     ),
   );
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => UserSessionProvider()),
+        ChangeNotifierProvider(create: (_) => ProjectProvider()),
+        ChangeNotifierProvider(create: (_) => RoomProvider()),
+        ChangeNotifierProvider(create: (_) => MaterialProvider()),
+      ],
       child: const RenovaSimApp(),
     ),
   );

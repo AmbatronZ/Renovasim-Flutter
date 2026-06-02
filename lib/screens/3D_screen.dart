@@ -383,14 +383,18 @@ class _UploadBlueprintCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        'START IMPORT',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.coconutGreen,
-                          letterSpacing: 0.5,
-                          fontFamily: 'PPNeueMontrealMedium',
+                      Flexible(
+                        child: Text(
+                          'START IMPORT',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.coconutGreen,
+                            letterSpacing: 0.5,
+                            fontFamily: 'PPNeueMontrealMedium',
+                          ),
                         ),
                       ),
                       const SizedBox(width: 4),

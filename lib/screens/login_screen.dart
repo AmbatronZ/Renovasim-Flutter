@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'register_screen.dart';
-import 'error_screen.dart';
 import 'home_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../core/theme_provider.dart';
+import '../core/theme_provider.dart';
+import '../core/auth_service.dart';
+import '../core/providers/user_session_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,15 +15,11 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailCtrl = TextEditingController(text:'rusdi01gaming@gmail.com');
-  final _passCtrl = TextEditingController(text:'12345678');
+  final _emailCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
   bool _obscurePass = true;
   bool _rememberMe = false;
   bool _isLoading = false;
-
-  // Kredensial native sementara
-  static const String _validEmail = 'rusdi01gaming@gmail.com';
-  static const String _validPassword = '12345678';
 
   @override
   void dispose() {
@@ -32,29 +29,43 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
     final email = _emailCtrl.text.trim();
     final password = _passCtrl.text.trim();
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email dan password tidak boleh kosong.')),
+      );
+      return;
+    }
 
-    if (email == _validEmail && password == _validPassword) {
-      // Login berhasil → ke HomeScreen
+    setState(() => _isLoading = true);
+    try {
+      final userResponse = await AuthService.signIn(email: email, password: password);
+      
+      // Extract user ID from response and set in UserSessionProvider
+      final userId = userResponse['id'] as int?;
+      if (userId != null && mounted) {
+        await context.read<UserSessionProvider>().loadUser(userId);
+      }
+      
+      if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const HomeScreen()),
         (route) => false,
       );
-    } else {
-      // Login gagal → ke ErrorScreen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const ErrorScreen(isNetworkError: false),
-        ),
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
       );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Terjadi kesalahan. Coba lagi.')),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

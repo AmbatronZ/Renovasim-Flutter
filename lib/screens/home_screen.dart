@@ -8,6 +8,8 @@ import 'cs_screen.dart';
 import 'dashboard_screen.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/theme_provider.dart';
+import '../../core/providers/project_provider.dart';
+import '../../core/providers/user_session_provider.dart';
 import '../../data/models/project_model.dart';
 import 'notification_screen.dart';
 import 'ai_create_screen.dart';
@@ -313,41 +315,132 @@ class _HeroBanner extends StatelessWidget {
 
 // ─── Portfolio Section ────────────────────────────────────────────────────────
 
-class _PortfolioSection extends StatelessWidget {
-  final List<ProjectModel> projects = const [
-    ProjectModel(
-      title: 'Scandinavian Room',
-      location: 'Jakarta, ID',
-      budget: 'Rp 15.500.000',
-      status: 'IN PROGRESS',
-      imagePath: 'assets/images/background3.png',
-      isInProgress: true,
-    ),
-    ProjectModel(
-      title: 'Cozy Haze Kitchen',
-      location: null,
-      budget: 'Rp 4.250.000',
-      status: 'DRAFTING',
-      imagePath: 'assets/images/background4.png',
-      isInProgress: false,
-      draftInfo: '12 item',
-    ),
-    ProjectModel(
-      title: 'Minimalist Office',
-      location: null,
-      budget: 'Rp 8.900.000',
-      status: 'Done',
-      imagePath: 'assets/images/background5.png',
-      isInProgress: false,
-      updatedInfo: 'Updated 2h ago',
-    ),
-  ];
+class _PortfolioSection extends StatefulWidget {
+  const _PortfolioSection({Key? key}) : super(key: key);
+
+  @override
+  State<_PortfolioSection> createState() => _PortfolioSectionState();
+}
+
+class _PortfolioSectionState extends State<_PortfolioSection> {
+  @override
+  void initState() {
+    super.initState();
+    // Defer loading until after build phase completes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadProjects();
+    });
+  }
+
+  Future<void> _loadProjects() async {
+    final userSession = context.read<UserSessionProvider>();
+    final projectProvider = context.read<ProjectProvider>();
+    
+    if (userSession.userId != null) {
+      await projectProvider.loadProjects(userSession.userId!);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+    return Consumer<ProjectProvider>(
+      builder: (context, projectProvider, _) {
+        // Show loading state
+        if (projectProvider.isLoading) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                const CircularProgressIndicator(color: AppColors.coconutGreen),
+                const SizedBox(height: 16),
+                Text(
+                  'Loading projects...',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary(context),
+                    fontFamily: 'PPNeueMontrealMedium',
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // Show error state
+        if (projectProvider.error != null) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                Icon(
+                  Icons.error_outline,
+                  color: Colors.red[400],
+                  size: 40,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  projectProvider.error ?? 'Error loading projects',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary(context),
+                    fontFamily: 'PPNeueMontrealMedium',
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: _loadProjects,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // Show empty state
+        if (projectProvider.projects.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                Icon(
+                  Icons.folder_open,
+                  size: 50,
+                  color: AppColors.textSecondary(context),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No Projects Yet',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary(context),
+                    fontFamily: 'PPNeueMontrealMedium',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Create your first renovation project to get started.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary(context),
+                    fontFamily: 'PPNeueMontrealMedium',
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // Show projects
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
@@ -388,7 +481,7 @@ class _PortfolioSection extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'Managing 3 active renovations with real-time\nbudget tracking.',
+                'Managing ${projectProvider.projects.length} ${projectProvider.projects.length == 1 ? 'project' : 'projects'} with real-time\nbudget tracking.',
                 style: TextStyle(
                   fontSize: 12,
                   color: AppColors.textSecondary(context),
@@ -400,12 +493,14 @@ class _PortfolioSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        ...projects.map((p) => Padding(
+        ...projectProvider.projects.map((p) => Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
               child: _ProjectCard(data: p),
             )),
       ],
+    );
+      },
     );
   }
 }
@@ -424,7 +519,7 @@ class _ProjectCard extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             Image.asset(
-              data.imagePath,
+              data.imagePath ?? 'assets/images/background3.png',
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) =>
                   Container(color: AppColors.thatchGreen),
@@ -455,7 +550,7 @@ class _ProjectCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    data.budget,
+                    'Rp ${(data.totalCost / 1000000).toStringAsFixed(1)}M',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -491,7 +586,7 @@ class _ProjectCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        data.budget,
+                        'Rp ${(data.totalCost / 1000000).toStringAsFixed(1)}M',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
@@ -538,7 +633,7 @@ class _ProjectCard extends StatelessWidget {
                             ),
                           ),
                         Text(
-                          data.title,
+                          data.name,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -546,33 +641,34 @@ class _ProjectCard extends StatelessWidget {
                             fontFamily: 'PPEditorialNew',
                           ),
                         ),
-                        if (data.location != null)
-                          Row(children: [
-                            const Icon(Icons.location_on_outlined,
-                                size: 12, color: Colors.white70),
-                            const SizedBox(width: 3),
-                            Text(data.location!,
+                        Row(children: [
+                          const Icon(Icons.door_sliding_outlined,
+                              size: 12, color: Colors.white70),
+                          const SizedBox(width: 3),
+                          Expanded(
+                            child: Text(data.roomType.replaceAll('_', ' ').toUpperCase(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                     fontSize: 11, color: Colors.white70)),
-                          ]),
-                        if (data.draftInfo != null)
-                          Row(children: [
-                            const Icon(Icons.layers_outlined,
-                                size: 12, color: Colors.white70),
-                            const SizedBox(width: 3),
-                            Text(data.draftInfo!,
-                                style: const TextStyle(
-                                    fontSize: 11, color: Colors.white70)),
-                          ]),
-                        if (data.updatedInfo != null)
-                          Row(children: [
-                            const Icon(Icons.access_time_rounded,
-                                size: 12, color: Colors.white70),
-                            const SizedBox(width: 3),
-                            Text(data.updatedInfo!,
-                                style: const TextStyle(
-                                    fontSize: 11, color: Colors.white70)),
-                          ]),
+                          ),
+                        ]),
+                        Row(children: [
+                          const Icon(Icons.square_foot_rounded,
+                              size: 12, color: Colors.white70),
+                          const SizedBox(width: 3),
+                          Text('${data.areaSize}m²',
+                              style: const TextStyle(
+                                  fontSize: 11, color: Colors.white70)),
+                        ]),
+                        Row(children: [
+                          const Icon(Icons.access_time_rounded,
+                              size: 12, color: Colors.white70),
+                          const SizedBox(width: 3),
+                          Text('${data.updatedAt.day}/${data.updatedAt.month}/${data.updatedAt.year}',
+                              style: const TextStyle(
+                                  fontSize: 11, color: Colors.white70)),
+                        ]),
                       ],
                     ),
                   ),
