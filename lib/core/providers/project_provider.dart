@@ -47,11 +47,13 @@ class ProjectProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> createProject({
+  Future<ProjectModel> createProject({
     required int userId,
     required String name,
     required String roomType,
     required double areaSize,
+    double totalCost = 0,
+    String status = 'draft',
   }) async {
     _isLoading = true;
     _error = null;
@@ -63,12 +65,16 @@ class ProjectProvider extends ChangeNotifier {
         name: name,
         roomType: roomType,
         areaSize: areaSize,
+        totalCost: totalCost,
+        status: status,
       );
       _projects.insert(0, project);
       _selectedProject = project;
       _error = null;
+      return project;
     } catch (e) {
       _error = e.toString();
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();

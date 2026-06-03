@@ -7,6 +7,7 @@ import 'core/providers/user_session_provider.dart';
 import 'core/providers/project_provider.dart';
 import 'core/providers/room_provider.dart';
 import 'core/providers/material_provider.dart';
+import 'core/providers/pricing_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => ProjectProvider()),
         ChangeNotifierProvider(create: (_) => RoomProvider()),
         ChangeNotifierProvider(create: (_) => MaterialProvider()),
+        ChangeNotifierProvider(create: (_) => PricingProvider()),
       ],
       child: const RenovaSimApp(),
     ),

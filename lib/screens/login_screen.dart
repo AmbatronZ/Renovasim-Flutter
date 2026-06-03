@@ -258,41 +258,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-
-              // Divider
-              Row(children: [
-                const Expanded(child: Divider()),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Text('Or',
-                      style:
-                          TextStyle(fontSize: 13, color: Colors.grey[400])),
-                ),
-                const Expanded(child: Divider()),
-              ]),
-              const SizedBox(height: 20),
-
-              // Google sign in
-              _SocialButton(
-                icon: const Text('G',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF4285F4),
-                    )),
-                label: 'Sign in with Google',
-                onTap: () {},
-              ),
-              const SizedBox(height: 12),
-
-              // Facebook sign in
-              _SocialButton(
-                icon: const Icon(Icons.facebook_rounded,
-                    color: Color(0xFF1877F2), size: 22),
-                label: 'Sign in with Facebook',
-                onTap: () {},
-              ),
-              const SizedBox(height: 24),
             ],
           ),
         ),

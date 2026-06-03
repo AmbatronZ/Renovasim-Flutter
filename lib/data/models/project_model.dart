@@ -24,17 +24,55 @@ class ProjectModel {
   });
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
+    // Helper to safely parse numbers from various formats (int, double, string)
+    double parseDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is num) return value.toDouble();
+      return double.tryParse(value.toString()) ?? 0.0;
+    }
+
+    int parseInt(dynamic value) {
+      if (value == null) return 0;
+      if (value is num) return value.toInt();
+      return int.tryParse(value.toString()) ?? 0;
+    }
+
+    // Safely parse everything
+    final id = parseInt(json['id']);
+    final userId = parseInt(json['user_id']);
+    
+    final name = (json['name'] ?? json['project_name'])?.toString() ?? 'Unnamed Project';
+    final roomType = (json['room_type'] ?? json['mode'])?.toString() ?? 'General';
+    final status = (json['status'])?.toString() ?? 'draft';
+    
+    final areaSize = parseDouble(json['area_size'] ?? json['area']);
+    final totalCost = parseDouble(json['total_cost'] ?? json['total_price']);
+
+    // Date fields
+    DateTime parseDate(dynamic dateStr) {
+      if (dateStr == null) return DateTime.now();
+      try {
+        return DateTime.parse(dateStr.toString());
+      } catch (_) {
+        return DateTime.now();
+      }
+    }
+    
+    final createdAt = parseDate(json['created_at']);
+    final updatedAt = parseDate(json['updated_at']);
+    final imagePath = json['image_path']?.toString();
+
     return ProjectModel(
-      id: json['id'] as int,
-      userId: json['user_id'] as int,
-      name: json['name'] as String,
-      roomType: json['room_type'] as String,
-      areaSize: (json['area_size'] as num).toDouble(),
-      totalCost: (json['total_cost'] as num?)?.toDouble() ?? 0,
-      status: json['status'] as String? ?? 'draft',
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-      imagePath: json['image_path'] as String?,
+      id: id,
+      userId: userId,
+      name: name,
+      roomType: roomType,
+      areaSize: areaSize,
+      totalCost: totalCost,
+      status: status,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      imagePath: imagePath,
     );
   }
 

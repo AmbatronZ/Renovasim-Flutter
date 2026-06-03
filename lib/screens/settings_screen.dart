@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
-import 'profile_screen.dart';
+import 'profile_setting_screen.dart';
 import 'login_screen.dart';
 import 'about_us_screen.dart';
 import 'help_support_screen.dart';
@@ -8,6 +8,7 @@ import 'terms_conditions_screen.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme_provider.dart';
 import 'notification_screen.dart';
+import '../../core/providers/user_session_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -22,6 +23,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userSession = context.watch<UserSessionProvider>();
+    final user = userSession.currentUser;
+    final fullName = user != null
+        ? "${user.firstName ?? user.name} ${user.lastName ?? ''}".trim()
+        : "Guest User";
+
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground(context),
       body: Stack(
@@ -96,13 +103,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  'Rusdi Ambalan',
+                                  fullName,
                                   style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.textPrimary(context),
                                     fontFamily: 'PPEditorialNew',
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               const Icon(Icons.notifications_rounded,
@@ -123,17 +132,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) => const ProfileScreen()),
+                                    builder: (_) => const ProfileSettingScreen()),
                               ),
                             ),
                             _Divider(),
                             _SettingsTile(
                               label: 'Change password',
-                              onTap: () {},
-                            ),
-                            _Divider(),
-                            _SettingsTile(
-                              label: 'Keamanan dan izin',
                               onTap: () {},
                             ),
                             _Divider(),
@@ -202,6 +206,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             height: 50,
                             child: OutlinedButton.icon(
                               onPressed: () {
+                                userSession.clearUser();
                                 Navigator.pushAndRemoveUntil(
                                   context,
                                   MaterialPageRoute(

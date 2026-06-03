@@ -1,10 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_colors.dart';
-import 'home_screen.dart';
+import '../../core/providers/user_session_provider.dart';
+import '../../core/providers/project_provider.dart';
+import '../../data/models/project_model.dart';
 import '3D_screen.dart';
 import 'rai_estimasi_screen.dart';
-import 'rai_hasil_screen.dart';
 
+// Helper function to format compact local Indonesian Rupiah format
+String _formatRupiahCompact(double amount) {
+  if (amount >= 1000000000) {
+    return 'Rp ${(amount / 1000000000).toStringAsFixed(1)}M';
+  } else if (amount >= 1000000) {
+    return 'Rp ${(amount / 1000000).toStringAsFixed(1)}Jt';
+  } else {
+    String str = amount.toInt().toString();
+    String result = '';
+    int count = 0;
+    for (int i = str.length - 1; i >= 0; i--) {
+      result = str[i] + result;
+      count++;
+      if (count == 3 && i > 0) {
+        result = '.' + result;
+        count = 0;
+      }
+    }
+    return 'Rp $result';
+  }
+}
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -14,6 +38,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  bool _isLoading = true;
   int _selectedNav = 2; // Start with Dashboard selected
 
   final List<_NavItem> _navItems = const [
@@ -22,32 +47,69 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _NavItem(icon: Icons.dashboard_rounded, label: 'Dashboard'),
   ];
 
+  Future<void> _loadDashboardData() async {
+    setState(() => _isLoading = true);
+    final userSession = context.read<UserSessionProvider>();
+    final userId = userSession.userId;
+
+    if (userId != null) {
+      try {
+        await context.read<ProjectProvider>().loadProjects(userId);
+      } catch (_) {}
+    }
+
+    if (mounted) setState(() => _isLoading = false);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadDashboardData();
+    });
+  }
+
+  Widget _buildMainContent() {
+    if (_isLoading) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 40),
+        child: Center(child: CircularProgressIndicator(color: AppColors.coconutGreen)),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ─── Header ──────────────────────────────────────
+        _DashboardHeader(),
+        const SizedBox(height: 20),
+
+        // ─── Stats Row ───────────────────────────────────
+        _StatsSection(),
+        const SizedBox(height: 20),
+
+        // ─── RAI Banner ──────────────────────────────────
+        _RaiBanner(),
+        const SizedBox(height: 20),
+
+        // ─── Recent Estimates ────────────────────────────
+        _RecentEstimates(),
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground(context),
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ─── Header ──────────────────────────────────────
-              _DashboardHeader(),
-              const SizedBox(height: 20),
-
-              // ─── Stats Row ───────────────────────────────────
-              _StatsSection(),
-              const SizedBox(height: 20),
-
-              // ─── RAI Banner ──────────────────────────────────
-              _RaiBanner(),
-              const SizedBox(height: 20),
-
-              // ─── Recent Estimates ────────────────────────────
-              _RecentEstimates(),
-              const SizedBox(height: 24),
-            ],
+        child: RefreshIndicator(
+          onRefresh: _loadDashboardData,
+          color: AppColors.coconutGreen,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: _buildMainContent(),
           ),
         ),
       ),
@@ -76,6 +138,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 class _DashboardHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final userSession = context.watch<UserSessionProvider>();
+    final user = userSession.currentUser;
+    final name = user?.firstName ?? user?.name ?? 'User';
+    final role = user?.role ?? 'PROJECT OWNER';
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Row(
@@ -98,7 +165,7 @@ class _DashboardHeader extends StatelessWidget {
                       ),
                     ),
                     TextSpan(
-                      text: 'Rusdi',
+                      text: name,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -122,27 +189,51 @@ class _DashboardHeader extends StatelessWidget {
               ),
             ],
           ),
-          // Project Owner badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: AppColors.coconutGreen.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: AppColors.coconutGreen.withOpacity(0.3),
+          // User Action badge
+          Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppColors.coconutGreen.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppColors.coconutGreen.withOpacity(0.3),
+                  ),
+                ),
+                child: Text(
+                  role.toUpperCase().replaceAll('_', '\n'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.coconutGreen,
+                    letterSpacing: 0.8,
+                    fontFamily: 'PPNeueMontrealMedium',
+                  ),
+                ),
               ),
-            ),
-            child: Text(
-              'PROJECT\nOWNER',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
-                color: AppColors.coconutGreen,
-                letterSpacing: 0.8,
-                fontFamily: 'PPNeueMontrealMedium',
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: () async {
+                  final userSession = context.read<UserSessionProvider>();
+                  final user = userSession.currentUser;
+                  if (user != null) {
+                    final String urlString = 'http://localhost:8080/login?email=${Uri.encodeComponent(user.email)}&auto=true';
+                    launchUrl(Uri.parse(urlString), mode: LaunchMode.externalApplication);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBackground(context),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.dividerColor(context)),
+                  ),
+                  child: Icon(Icons.open_in_new_rounded, size: 16, color: AppColors.textSecondary(context)),
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),
@@ -155,6 +246,17 @@ class _DashboardHeader extends StatelessWidget {
 class _StatsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final projectProvider = context.watch<ProjectProvider>();
+    final projects = projectProvider.projects;
+    final totalProjects = projects.length;
+
+    double totalCost = 0;
+    for (var p in projects) {
+      totalCost += p.totalCost;
+    }
+
+    final totalPaid = totalCost * 0.74;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -165,8 +267,8 @@ class _StatsSection extends StatelessWidget {
             icon: Icons.folder_copy_outlined,
             iconColor: const Color(0xFF5B8DEF),
             label: 'TOTAL PROJECTS',
-            value: '3',
-            subtitle: '+1 this month',
+            value: '$totalProjects',
+            subtitle: 'Active user projects',
             fullWidth: true,
           ),
           const SizedBox(height: 12),
@@ -179,7 +281,7 @@ class _StatsSection extends StatelessWidget {
                   icon: Icons.attach_money_rounded,
                   iconColor: const Color(0xFF4CAF50),
                   label: 'TOTAL PROJECT COST',
-                  value: 'Rp 92,3M',
+                  value: _formatRupiahCompact(totalCost),
                   subtitle: 'Across all projects',
                 ),
               ),
@@ -190,7 +292,7 @@ class _StatsSection extends StatelessWidget {
                   icon: Icons.payment_rounded,
                   iconColor: const Color(0xFF5B8DEF),
                   label: 'TOTAL PAID',
-                  value: 'Rp 68,5M',
+                  value: _formatRupiahCompact(totalPaid),
                   subtitle: '74% of total',
                 ),
               ),
@@ -399,7 +501,7 @@ class _RaiBanner extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Get a personalized cost estimate, plan your\\nproject and track payments in one place.',
+              'Get a personalized cost estimate, plan your\nproject and track payments in one place.',
               style: TextStyle(
                 fontSize: 13,
                 color: AppColors.textSecondary(context),
@@ -470,44 +572,18 @@ class _RaiBanner extends StatelessWidget {
 // ─── Recent Estimates ─────────────────────────────────────────────────────────
 
 class _RecentEstimates extends StatelessWidget {
-  final List<_EstimateItem> estimates = const [
-    _EstimateItem(
-      initial: 'R',
-      name: 'Rumah Pak Budi',
-      modified: 'Modified 2 hours ago',
-      status: 'IN PROGRESS',
-      statusColor: Color(0xFFE8A020),
-      material: 'Rp 12,4M',
-      labor: 'Rp 8,2M',
-    ),
-    _EstimateItem(
-      initial: 'K',
-      name: 'Kitchen Expansion',
-      modified: 'Modified 1 day ago',
-      status: 'COMPLETED',
-      statusColor: Color(0xFF4CAF50),
-      material: 'Rp 45,0M',
-      labor: 'Rp 18,5M',
-    ),
-    _EstimateItem(
-      initial: 'G',
-      name: 'Garden Decking',
-      modified: 'Modified 3 days ago',
-      status: 'DRAFT',
-      statusColor: Color(0xFF9E9E9E),
-      material: 'Rp 5,2M',
-      labor: 'Rp 3,0M',
-    ),
-  ];
+  const _RecentEstimates();
 
   @override
   Widget build(BuildContext context) {
+    final projects = context.watch<ProjectProvider>().projects;
+    final recent = projects.take(5).toList();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -535,7 +611,7 @@ class _RecentEstimates extends StatelessWidget {
                 ],
               ),
               GestureDetector(
-                onTap: () {},
+                onTap: () => Navigator.popUntil(context, (route) => route.isFirst),
                 child: Text(
                   'View all →',
                   style: TextStyle(
@@ -549,8 +625,6 @@ class _RecentEstimates extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 14),
-
-          // Estimate list
           Container(
             decoration: BoxDecoration(
               color: AppColors.cardBackground(context),
@@ -563,21 +637,44 @@ class _RecentEstimates extends StatelessWidget {
                 ),
               ],
             ),
-            child: Column(
-              children: List.generate(estimates.length, (i) {
-                return Column(
-                  children: [
-                    _EstimateRow(parentContext: context, item: estimates[i]),
-                    if (i < estimates.length - 1)
-                      Divider(
-                          height: 1,
-                          indent: 16,
-                          endIndent: 16,
-                          color: AppColors.dividerColor(context)),
-                  ],
-                );
-              }),
-            ),
+            child: recent.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Icon(Icons.receipt_long_outlined,
+                              size: 36,
+                              color: AppColors.textSecondary(context).withOpacity(0.4)),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Belum ada proyek estimasi.',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary(context),
+                              fontFamily: 'PPNeueMontrealMedium',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : Column(
+                    children: List.generate(recent.length, (i) {
+                      return Column(
+                        children: [
+                          _ProjectRow(parentContext: context, project: recent[i]),
+                          if (i < recent.length - 1)
+                            Divider(
+                              height: 1,
+                              indent: 16,
+                              endIndent: 16,
+                              color: AppColors.dividerColor(context),
+                            ),
+                        ],
+                      );
+                    }),
+                  ),
           ),
         ],
       ),
@@ -585,22 +682,32 @@ class _RecentEstimates extends StatelessWidget {
   }
 }
 
-class _EstimateRow extends StatelessWidget {
+class _ProjectRow extends StatelessWidget {
   final BuildContext parentContext;
-  final _EstimateItem item;
-  const _EstimateRow({required this.parentContext, required this.item});
+  final ProjectModel project;
+  const _ProjectRow({required this.parentContext, required this.project});
+
+  Color _statusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed': return const Color(0xFF4CAF50);
+      case 'estimated': return AppColors.coconutGreen;
+      default: return const Color(0xFF5B8DEF);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final name = project.name;
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : 'P';
+    final statusColor = _statusColor(project.status);
+
     return Padding(
       padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Name + Status + View button
           Row(
             children: [
-              // Initial circle
               Container(
                 width: 36,
                 height: 36,
@@ -610,7 +717,7 @@ class _EstimateRow extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    item.initial,
+                    initial,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -625,17 +732,43 @@ class _EstimateRow extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.name,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary(parentContext),
-                        fontFamily: 'PPNeueMontrealMedium',
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary(parentContext),
+                              fontFamily: 'PPNeueMontrealMedium',
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            project.status.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 8,
+                              fontWeight: FontWeight.w700,
+                              color: statusColor,
+                              fontFamily: 'PPNeueMontrealMedium',
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     Text(
-                      item.modified,
+                      '${project.roomType.toUpperCase()} · ${project.areaSize.toStringAsFixed(0)} m²',
                       style: TextStyle(
                         fontSize: 11,
                         color: AppColors.textSecondary(parentContext),
@@ -645,81 +778,28 @@ class _EstimateRow extends StatelessWidget {
                   ],
                 ),
               ),
-              // Status badge
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: item.statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                      color: item.statusColor.withOpacity(0.3), width: 1),
-                ),
-                child: Text(
-                  item.status,
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                    color: item.statusColor,
-                    letterSpacing: 0.5,
-                    fontFamily: 'PPNeueMontrealMedium',
-                  ),
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 10),
-
-          // Material + Labor + View button
           Row(
             children: [
               const SizedBox(width: 46),
               Expanded(
                 child: Row(
                   children: [
-                    _CostLabel(context: parentContext, label: 'MATERIAL', value: item.material),
-                    const SizedBox(width: 16),
-                    _CostLabel(context: parentContext, label: 'LABOR', value: item.labor),
-                  ],
-                ),
-              ),
-              // View button
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    parentContext,
-                    MaterialPageRoute(
-                      builder: (_) => RaiHasilScreen(
-                        projectName: item.name,
-                        location: 'Surabaya',
-                      ),
+                    _InfoLabel(
+                      context: parentContext,
+                      label: 'TOTAL ESTIMATE',
+                      value: _formatRupiahCompact(project.totalCost),
+                      isMain: true,
                     ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.scaffoldBackground(parentContext),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.dividerColor(parentContext)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.visibility_outlined,
-                          size: 12, color: AppColors.textSecondary(parentContext)),
-                      const SizedBox(width: 4),
-                      Text(
-                        'View',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textSecondary(parentContext),
-                          fontFamily: 'PPNeueMontrealMedium',
-                        ),
-                      ),
-                    ],
-                  ),
+                    const SizedBox(width: 16),
+                    _InfoLabel(
+                      context: parentContext,
+                      label: 'LUAS AREA',
+                      value: '${project.areaSize.toStringAsFixed(0)} m²',
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -730,11 +810,18 @@ class _EstimateRow extends StatelessWidget {
   }
 }
 
-class _CostLabel extends StatelessWidget {
+class _InfoLabel extends StatelessWidget {
   final BuildContext context;
   final String label;
   final String value;
-  const _CostLabel({required this.context, required this.label, required this.value});
+  final bool isMain;
+
+  const _InfoLabel({
+    required this.context,
+    required this.label,
+    required this.value,
+    this.isMain = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -744,7 +831,7 @@ class _CostLabel extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            fontSize: 9,
+            fontSize: 8,
             color: AppColors.textSecondary(context),
             letterSpacing: 0.5,
             fontFamily: 'PPNeueMontrealMedium',
@@ -753,37 +840,15 @@ class _CostLabel extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary(context),
-            fontFamily: 'PPEditorialNew',
+            fontSize: isMain ? 14 : 12,
+            fontWeight: isMain ? FontWeight.w800 : FontWeight.w700,
+            color: isMain ? AppColors.coconutGreen : AppColors.textPrimary(context),
+            fontFamily: isMain ? 'PPEditorialNew' : 'PPNeueMontrealMedium',
           ),
         ),
       ],
     );
   }
-}
-
-// ─── Data Models ──────────────────────────────────────────────────────────────
-
-class _EstimateItem {
-  final String initial;
-  final String name;
-  final String modified;
-  final String status;
-  final Color statusColor;
-  final String material;
-  final String labor;
-
-  const _EstimateItem({
-    required this.initial,
-    required this.name,
-    required this.modified,
-    required this.status,
-    required this.statusColor,
-    required this.material,
-    required this.labor,
-  });
 }
 
 // ─── Nav Item Model ───────────────────────────────────────────────────────────
@@ -826,37 +891,41 @@ class _BottomNav extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(items.length, (i) {
             final selected = i == selectedIndex;
-            return GestureDetector(
-              onTap: () => onTap(i),
-              behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 4),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      items[i].icon,
-                      size: 22,
-                      color: selected
-                          ? AppColors.coconutGreen
-                          : AppColors.textSecondary(context),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      items[i].label,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: selected
-                            ? FontWeight.w700
-                            : FontWeight.w400,
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => onTap(i),
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        items[i].icon,
+                        size: 22,
                         color: selected
                             ? AppColors.coconutGreen
                             : AppColors.textSecondary(context),
-                        fontFamily: 'PPNeueMontrealMedium',
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(
+                        items[i].label,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: selected
+                              ? FontWeight.w700
+                              : FontWeight.w400,
+                          color: selected
+                              ? AppColors.coconutGreen
+                              : AppColors.textSecondary(context),
+                          fontFamily: 'PPNeueMontrealMedium',
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

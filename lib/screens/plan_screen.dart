@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/providers/pricing_provider.dart';
+import '../../data/models/pricing_plan_model.dart';
+import 'package:intl/intl.dart';
 
 class PlanScreen extends StatefulWidget {
   const PlanScreen({super.key});
@@ -10,15 +14,23 @@ class PlanScreen extends StatefulWidget {
 
 class _PlanScreenState extends State<PlanScreen> {
   bool _isAnnual = false;
-  String? _selectedPlan;
+  int? _selectedPlanId;
 
-  void _selectPlan(String planName) {
-    setState(() => _selectedPlan = planName);
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PricingProvider>().loadPlans();
+    });
+  }
+
+  void _selectPlan(PricingPlanModel plan) {
+    setState(() => _selectedPlanId = plan.id);
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => _SuccessDialog(
-        planName: planName,
+        planName: plan.name,
         onClose: () => Navigator.pop(context),
       ),
     );
@@ -36,83 +48,267 @@ class _PlanScreenState extends State<PlanScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
               child: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new_rounded,
+                icon: const Icon(Icons.arrow_back_ios_new_rounded,
                     color: AppColors.metallicBlack, size: 20),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
 
             Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
+              child: Consumer<PricingProvider>(
+                builder: (context, provider, child) {
+                  if (provider.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                    // ─── Title ───────────────────────────────────
-                    Text(
-                      'Plans & Pricing',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.metallicBlack,
-                        fontFamily: 'PPEditorialNew',
+                  if (provider.error != null && provider.plans.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                          const SizedBox(height: 16),
+                          Text('Gagal memuat paket: ${provider.error}'),
+                          TextButton(
+                            onPressed: () => provider.loadPlans(),
+                            child: const Text('Coba Lagi'),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 12),
+                    );
+                  }
 
-                    Text(
-                      'Pilih paket yang sesuai dengan kebutuhan Anda. '
-                      'Semua paket mencakup fitur-fitur penting untuk memulai, '
-                      'dengan opsi untuk meningkatkan skala seiring pertumbuhan '
-                      'bisnis Anda. Tidak ada biaya tersembunyi dan fleksibilitas '
-                      'untuk mengubah paket kapan saja.',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.zenGray,
-                        height: 1.6,
-                        fontFamily: 'PPNeueMontrealMedium',
-                      ),
-                    ),
-                    const SizedBox(height: 24),
+                  return SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 8),
 
-                    // ─── Monthly / Annual Toggle ──────────────────
-                    _BillingToggle(
-                      isAnnual: _isAnnual,
-                      onChanged: (v) => setState(() => _isAnnual = v),
-                    ),
-                    const SizedBox(height: 28),
+                        // ─── Title ───────────────────────────────────
+                        const Text(
+                          'Plans & Pricing',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.metallicBlack,
+                            fontFamily: 'PPEditorialNew',
+                          ),
+                        ),
+                        const SizedBox(height: 12),
 
-                    // ─── Professional Plan ────────────────────────
-                    _ProfessionalCard(
-                      isAnnual: _isAnnual,
-                      isSelected: _selectedPlan == 'Professional',
-                      onSelect: () => _selectPlan('Professional'),
-                    ),
-                    const SizedBox(height: 16),
+                        const Text(
+                          'Pilih paket yang sesuai dengan kebutuhan Anda. '
+                          'Semua paket mencakup fitur-fitur penting untuk memulai, '
+                          'dengan opsi untuk meningkatkan skala seiring pertumbuhan '
+                          'bisnis Anda. Tidak ada biaya tersembunyi dan fleksibilitas '
+                          'untuk mengubah paket kapan saja.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.zenGray,
+                            height: 1.6,
+                            fontFamily: 'PPNeueMontrealMedium',
+                          ),
+                        ),
+                        const SizedBox(height: 24),
 
-                    // ─── Starter Plan ─────────────────────────────
-                    _StarterCard(
-                      isSelected: _selectedPlan == 'Starter',
-                      onSelect: () => _selectPlan('Starter'),
-                    ),
-                    const SizedBox(height: 16),
+                        // ─── Monthly / Annual Toggle ──────────────────
+                        _BillingToggle(
+                          isAnnual: _isAnnual,
+                          onChanged: (v) => setState(() => _isAnnual = v),
+                        ),
+                        const SizedBox(height: 28),
 
-                    // ─── Organization Plan ────────────────────────
-                    _OrganizationCard(
-                      isAnnual: _isAnnual,
-                      isSelected: _selectedPlan == 'Organization',
-                      onSelect: () => _selectPlan('Organization'),
+                        // ─── Dynamic Plans ────────────────────────────
+                        ...provider.plans.map((plan) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: _PricingCard(
+                              plan: plan,
+                              isAnnual: _isAnnual,
+                              isSelected: _selectedPlanId == plan.id,
+                              onSelect: () => _selectPlan(plan),
+                            ),
+                          );
+                        }).toList(),
+                        
+                        const SizedBox(height: 40),
+                      ],
                     ),
-                    const SizedBox(height: 40),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─── Pricing Card (Dynamic) ───────────────────────────────────────────────────
+
+class _PricingCard extends StatelessWidget {
+  final PricingPlanModel plan;
+  final bool isAnnual;
+  final bool isSelected;
+  final VoidCallback onSelect;
+
+  const _PricingCard({
+    required this.plan,
+    required this.isAnnual,
+    required this.isSelected,
+    required this.onSelect,
+  });
+
+  String _formatCurrency(double amount) {
+    if (amount == 0) return 'Free';
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    return formatter.format(amount);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final price = isAnnual ? plan.priceAnnual : plan.priceMonthly;
+    final isPopular = plan.isPopular;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isPopular ? const Color(0xFFFFC928) : (isSelected ? AppColors.coconutGreen : const Color(0xFFE8E8E8)),
+          width: isSelected || isPopular ? 2.5 : 1,
+        ),
+        boxShadow: isPopular 
+          ? [
+              BoxShadow(
+                color: const Color(0xFFFFC928).withOpacity(0.2),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ]
+          : [
+              BoxShadow(
+                color: AppColors.metallicBlack.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+      ),
+      child: Column(
+        children: [
+          // Badge if any
+          if (plan.badge != null || isPopular)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 7),
+              decoration: BoxDecoration(
+                color: isPopular ? const Color(0xFFFFC928) : AppColors.coconutGreen,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+              ),
+              child: Text(
+                (plan.badge ?? (isPopular ? 'MOST POPULAR PLAN' : '')).toUpperCase(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: isPopular ? Colors.black.withOpacity(0.75) : Colors.white,
+                  letterSpacing: 1.2,
+                  fontFamily: 'PPNeueMontrealMedium',
+                ),
+              ),
+            ),
+
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  plan.name,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.metallicBlack,
+                    fontFamily: 'PPEditorialNew',
+                  ),
+                ),
+                if (plan.description != null)
+                  Text(
+                    plan.description!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.zenGray,
+                      fontFamily: 'PPNeueMontrealMedium',
+                    ),
+                  ),
+                const SizedBox(height: 14),
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: _formatCurrency(price),
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.metallicBlack,
+                          fontFamily: 'PPEditorialNew',
+                        ),
+                      ),
+                      if (price > 0)
+                        const TextSpan(
+                          text: ' /user',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.zenGray,
+                            fontFamily: 'PPNeueMontrealMedium',
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                // Features
+                ...plan.features.map((f) => _FeatureItem(
+                  text: f.text, 
+                  isHighlight: f.isHighlight
+                )),
+                
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: onSelect,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.metallicBlack,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: Text(
+                      isSelected ? '✓ Plan Selected' : (price == 0 ? 'Try for free' : 'Select plan'),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'PPNeueMontrealMedium',
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -213,388 +409,7 @@ class _ToggleOption extends StatelessWidget {
   }
 }
 
-// ─── Professional Card (White + Yellow Stroke) ────────────────────────────────
 
-class _ProfessionalCard extends StatelessWidget {
-  final bool isAnnual;
-  final bool isSelected;
-  final VoidCallback onSelect;
-
-  const _ProfessionalCard({
-    required this.isAnnual,
-    required this.isSelected,
-    required this.onSelect,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final price = isAnnual ? 'Rp.42.500' : 'Rp.50.000';
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: const Color(0xFFFFC928),
-          width: isSelected ? 3 : 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFFFC928).withOpacity(0.2),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Most Popular badge
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 7),
-            decoration: const BoxDecoration(
-              color: Color(0xFFFFC928),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-            ),
-            child: Text(
-              'MOST POPULAR PLAN',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                color: Colors.black.withOpacity(0.75),
-                letterSpacing: 1.2,
-                fontFamily: 'PPNeueMontrealMedium',
-              ),
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Professional',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.metallicBlack,
-                    fontFamily: 'PPEditorialNew',
-                  ),
-                ),
-                Text(
-                  'For freelancers and startups',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.zenGray,
-                    fontFamily: 'PPNeueMontrealMedium',
-                  ),
-                ),
-                const SizedBox(height: 14),
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: price,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.metallicBlack,
-                          fontFamily: 'PPEditorialNew',
-                        ),
-                      ),
-                      TextSpan(
-                        text: ' /per user',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.zenGray,
-                          fontFamily: 'PPNeueMontrealMedium',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _FeatureItem(text: 'All starter features +', isHighlight: true),
-                _FeatureItem(text: 'Up to 5 user accounts'),
-                _FeatureItem(text: 'Team collaboration tools'),
-                _FeatureItem(text: 'Custom dashboards'),
-                _FeatureItem(text: 'Multiple data export formats'),
-                _FeatureItem(text: 'Up to 100 project room'),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: onSelect,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.metallicBlack,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: Text(
-                      isSelected ? '✓ Plan Selected' : 'Select plan',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'PPNeueMontrealMedium',
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Center(
-                  child: GestureDetector(
-                    onTap: () {},
-                    child: Text(
-                      'or contact sales',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.zenGray,
-                        decoration: TextDecoration.underline,
-                        decorationColor: AppColors.zenGray,
-                        fontFamily: 'PPNeueMontrealMedium',
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Starter Card ─────────────────────────────────────────────────────────────
-
-class _StarterCard extends StatelessWidget {
-  final bool isSelected;
-  final VoidCallback onSelect;
-
-  const _StarterCard({required this.isSelected, required this.onSelect});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isSelected ? AppColors.coconutGreen : const Color(0xFFE8E8E8),
-          width: isSelected ? 2 : 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.metallicBlack.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Starter',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: AppColors.metallicBlack,
-              fontFamily: 'PPEditorialNew',
-            ),
-          ),
-          Text(
-            'Ideal for small projects',
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.zenGray,
-              fontFamily: 'PPNeueMontrealMedium',
-            ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            'Free',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: AppColors.metallicBlack,
-              fontFamily: 'PPEditorialNew',
-            ),
-          ),
-          const SizedBox(height: 16),
-          _FeatureItem(text: 'Unlimited personal files'),
-          _FeatureItem(text: 'Email support'),
-          _FeatureItem(text: 'CSV data export'),
-          _FeatureItem(text: 'Basic analytics dashboard'),
-          _FeatureItem(text: '1,000 API calls per month'),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: onSelect,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.metallicBlack,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-              child: Text(
-                isSelected ? '✓ Plan Selected' : 'Try for free',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'PPNeueMontrealMedium',
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Organization Card ────────────────────────────────────────────────────────
-
-class _OrganizationCard extends StatelessWidget {
-  final bool isAnnual;
-  final bool isSelected;
-  final VoidCallback onSelect;
-
-  const _OrganizationCard({
-    required this.isAnnual,
-    required this.isSelected,
-    required this.onSelect,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final price = isAnnual ? '\Rp.220.000' : '\Rp.250.000';
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isSelected ? AppColors.coconutGreen : const Color(0xFFE8E8E8),
-          width: isSelected ? 2 : 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.metallicBlack.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Organization',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: AppColors.metallicBlack,
-              fontFamily: 'PPEditorialNew',
-            ),
-          ),
-          Text(
-            'For fast-growing businesses',
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.zenGray,
-              fontFamily: 'PPNeueMontrealMedium',
-            ),
-          ),
-          const SizedBox(height: 14),
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: price,
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.metallicBlack,
-                    fontFamily: 'PPEditorialNew',
-                  ),
-                ),
-                TextSpan(
-                  text: ' /per user',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.zenGray,
-                    fontFamily: 'PPNeueMontrealMedium',
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          _FeatureItem(text: 'All professional features +', isHighlight: true),
-          _FeatureItem(text: 'Enterprise security suite'),
-          _FeatureItem(text: 'Single Sign-On (SSO)'),
-          _FeatureItem(text: 'Custom contract terms'),
-          _FeatureItem(text: 'Dedicated phone support'),
-          _FeatureItem(text: 'Custom integration support'),
-          _FeatureItem(text: 'Compliance tools'),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: onSelect,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.metallicBlack,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-              child: Text(
-                isSelected ? '✓ Plan Selected' : 'Select plan',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'PPNeueMontrealMedium',
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Center(
-            child: GestureDetector(
-              onTap: () {},
-              child: Text(
-                'or contact sales',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.zenGray,
-                  decoration: TextDecoration.underline,
-                  decorationColor: AppColors.zenGray,
-                  fontFamily: 'PPNeueMontrealMedium',
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ─── Feature Item ─────────────────────────────────────────────────────────────
 

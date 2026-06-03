@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
-import 'cs_screen.dart';
 
 class HelpSupportScreen extends StatefulWidget {
   const HelpSupportScreen({super.key});
@@ -432,92 +431,22 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
 
                         const SizedBox(height: 24),
 
-                        // ─── CS Button ───────────────────────────
+                        // ─── Footer ─────────────────────────────
                         Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 20),
-                          child: GestureDetector(
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                backgroundColor: Colors.transparent,
-                                builder: (_) => SizedBox(
-                                  height: MediaQuery.of(context).size.height *
-                                      0.85,
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(20),
-                                    ),
-                                    child: const CsScreen(),
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 14, horizontal: 20),
-                              decoration: BoxDecoration(
-                                color: AppColors.coconutGreen,
-                                borderRadius: BorderRadius.circular(14),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.coconutGreen
-                                        .withOpacity(0.3),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: const Icon(
-                                      Icons.headset_mic_rounded,
-                                      color: Colors.white,
-                                      size: 18,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    'Chat dengan CS Kami',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                      fontFamily: 'PPNeueMontrealMedium',
-                                    ),
-                                  ),
-                                ],
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              '© 2025 RenovaSim. All rights reserved.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textSecondary(context),
+                                fontFamily: 'PPNeueMontrealMedium',
                               ),
                             ),
                           ),
                         ),
-
-                        const SizedBox(height: 20), // ← jarak antara CS dan footer
-
-                        // ─── Footer ─────────────────────────────
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: SizedBox(
-                              width: double.infinity, // ← tambah ini
-                              child: Text(
-                                '© 2025 RenovaSim. All rights reserved.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.textSecondary(context),
-                                  fontFamily: 'PPNeueMontrealMedium',
-                                ),
-                              ),
-                            ),
-                          ),
 
                         const SizedBox(height: 32),
                       ],

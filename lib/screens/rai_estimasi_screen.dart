@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../data/repositories/laravel_estimation_repository.dart';
 import 'rai_hasil_screen.dart';
 
 class RaiEstimasiScreen extends StatefulWidget {
@@ -65,20 +66,40 @@ class _RaiEstimasiScreenState extends State<RaiEstimasiScreen> {
     }
 
     setState(() => _isLoading = true);
-    // Simulate AI processing
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted) return;
-    setState(() => _isLoading = false);
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => RaiHasilScreen(
-          projectName: widget.projectName ?? 'Estimasi Baru',
-          location: _selectedLokasi ?? widget.location ?? 'Surabaya',
+    try {
+      final budgetText = _budgetCtrl.text.replaceAll('.', '').replaceAll(',', '');
+      final budget = double.tryParse(budgetText);
+
+      final result = await LaravelEstimationRepository.estimateAI(
+        projectName: widget.projectName ?? 'Estimasi Baru',
+        description: _deskripsiCtrl.text,
+        location: _selectedLokasi ?? widget.location,
+        budget: budget,
+      );
+
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => RaiHasilScreen(
+            result: result,
+            location: _selectedLokasi ?? widget.location ?? 'Surabaya',
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal melakukan analisa: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override

@@ -1,18 +1,103 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/providers/project_provider.dart';
+import '../../core/providers/user_session_provider.dart';
+import '../data/models/estimation_result_model.dart';
+import '../data/repositories/laravel_estimation_repository.dart';
+import 'package:intl/intl.dart';
 
-class RaiHasilScreen extends StatelessWidget {
-  final String projectName;
+class RaiHasilScreen extends StatefulWidget {
+  final EstimationResultModel result;
   final String location;
 
   const RaiHasilScreen({
     super.key,
-    required this.projectName,
+    required this.result,
     required this.location,
   });
 
   @override
+  State<RaiHasilScreen> createState() => _RaiHasilScreenState();
+}
+
+class _RaiHasilScreenState extends State<RaiHasilScreen> {
+  bool _isSaving = false;
+
+  String _formatCurrency(double amount) {
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    return formatter.format(amount);
+  }
+
+  Future<void> _saveToProject() async {
+    final userSession = context.read<UserSessionProvider>();
+    final projectProvider = context.read<ProjectProvider>();
+
+    if (userSession.userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Silakan login terlebih dahulu')),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      // Save estimation result to Supabase estimations table
+      await LaravelEstimationRepository.saveToSupabase(
+        userSession.userId!,
+        widget.result,
+      );
+
+      // Create new project with full estimation data
+      await projectProvider.createProject(
+        userId: userSession.userId!,
+        name: widget.result.projectName,
+        roomType: widget.result.mode,
+        areaSize: widget.result.breakdown.isNotEmpty
+            ? widget.result.breakdown[0].area
+            : 25.0,
+        totalCost: widget.result.totalRange.min,
+        status: 'estimated',
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Proyek berhasil disimpan!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      
+      // Refresh and go back
+      await projectProvider.loadProjects(userSession.userId!);
+      if (!mounted) return;
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } catch (e) {
+      if (!mounted) return;
+      print('Save error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menyimpan proyek: ${e.toString().replaceAll('Exception: ', '')}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final result = widget.result;
+    final location = widget.location;
+    
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground(context),
       body: SafeArea(
@@ -30,19 +115,24 @@ class RaiHasilScreen extends StatelessWidget {
                       onTap: () => Navigator.pop(context),
                       child: Icon(
                         Icons.arrow_back_ios_new_rounded,
-                        size: 20,
+                        size: 18,
                         color: AppColors.textPrimary(context),
                       ),
                     ),
                     const Spacer(),
-                    Text(
-                      'HASIL ESTIMASI'.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textSecondary(context),
-                        letterSpacing: 1.2,
-                        fontFamily: 'PPNeueMontrealMedium',
+                    Flexible(
+                      child: Text(
+                        'HASIL ESTIMASI'.toUpperCase(),
+                        textAlign: TextAlign.right,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textSecondary(context),
+                          letterSpacing: 1.0,
+                          fontFamily: 'PPNeueMontrealMedium',
+                        ),
                       ),
                     ),
                   ],
@@ -53,7 +143,7 @@ class RaiHasilScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
-                  projectName.isNotEmpty ? projectName : 'RENOVASI RUMAH PAK BUD BUD',
+                  result.projectName,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
@@ -66,7 +156,7 @@ class RaiHasilScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
-                  'MODE STANDARD – ${projectName.toUpperCase()}',
+                  'MODE ${result.mode.toUpperCase()} – ${result.projectName.toUpperCase()}',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -77,78 +167,49 @@ class RaiHasilScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              // Alert boxes
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    // Warning
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFF3CD),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: const Color(0xFFFFE69C),
-                        ),
-                      ),
-                      child: Row(
-                        children: const [
-                          Icon(
-                            Icons.info_outline_rounded,
-                            size: 20,
-                            color: Color(0xFFF39C12),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Asuransi yang mengira Ngini atau biaya asmai canggih nyin. Estimator ini nilai meskipun pleaser cpt discon dan span istilng',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Color(0xFF856404),
-                                fontFamily: 'PPNeueMontrealMedium',
-                              ),
+              // Alert boxes (Warnings)
+              if (result.warnings.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: result.warnings.map((warning) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF3CD),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: const Color(0xFFFFE69C),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    // Danger Alert
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8D7DA),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: const Color(0xFFF5C6CB),
-                        ),
-                      ),
-                      child: Row(
-                        children: const [
-                          Icon(
-                            Icons.warning_rounded,
-                            size: 20,
-                            color: Color(0xFFDC3545),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Budget halo ≥ 10,000,000 tetanggamu tidak ada untuk cek ini. Estimasi masimal  Rp 33,3/7.000',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Color(0xFF721C24),
-                                fontFamily: 'PPNeueMontrealMedium',
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.info_outline_rounded,
+                                size: 20,
+                                color: Color(0xFFF39C12),
                               ),
-                            ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  warning,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF856404),
+                                    fontFamily: 'PPNeueMontrealMedium',
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
               // Total Cost Card
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -175,9 +236,9 @@ class RaiHasilScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      const Text(
-                        'Rp 33.3 juta – Rp 61.9 juta',
-                        style: TextStyle(
+                      Text(
+                        result.totalRange.display,
+                        style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w800,
                           color: AppColors.coconutGreen,
@@ -186,7 +247,7 @@ class RaiHasilScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Rp 55.327.000 – Rp 61.904.375',
+                        '${_formatCurrency(result.totalRange.min)} – ${_formatCurrency(result.totalRange.max)}',
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary(context),
@@ -195,21 +256,38 @@ class RaiHasilScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       // Confidence Level
-                      Text(
-                        'CONFIDENCE LEVEL',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textSecondary(context),
-                          letterSpacing: 1.2,
-                          fontFamily: 'PPNeueMontrealMedium',
-                        ),
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          Text(
+                            'CONFIDENCE LEVEL',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textSecondary(context),
+                              letterSpacing: 0.8,
+                              fontFamily: 'PPNeueMontrealMedium',
+                            ),
+                          ),
+                          Text(
+                            result.confidence.label,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.coconutGreen,
+                              fontFamily: 'PPNeueMontrealMedium',
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 8),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
-                          value: 0.7,
+                          value: result.confidence.score / 100,
                           minHeight: 8,
                           backgroundColor: AppColors.dividerColor(context),
                           valueColor: const AlwaysStoppedAnimation<Color>(
@@ -219,7 +297,7 @@ class RaiHasilScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Estimasi perlu halayak saume',
+                        result.confidence.message,
                         style: TextStyle(
                           fontSize: 11,
                           color: AppColors.textSecondary(context),
@@ -232,53 +310,54 @@ class RaiHasilScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               // Breakdown by Type
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Breakdown by Type',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary(context),
-                        fontFamily: 'PPEditorialNew',
+              if (result.breakdown.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Breakdown by Type',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary(context),
+                          fontFamily: 'PPEditorialNew',
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    _BreakdownTable(),
-                  ],
+                      const SizedBox(height: 12),
+                      _BreakdownTable(breakdown: result.breakdown),
+                    ],
+                  ),
                 ),
-              ),
               const SizedBox(height: 24),
-              // Project Summary
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'PROJECT SUMMARY',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textSecondary(context),
-                        letterSpacing: 1.2,
-                        fontFamily: 'PPNeueMontrealMedium',
+              // Assumptions
+              if (result.assumptions.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'ASSUMPTIONS & CLARIFICATIONS',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textSecondary(context),
+                          letterSpacing: 1.2,
+                          fontFamily: 'PPNeueMontrealMedium',
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    _SummaryItem(label: 'Lokasi', value: location.isNotEmpty ? location : 'Surabaya'),
-                    const _SummaryItem(label: 'Jenis Bangunan', value: 'Renovasi'),
-                    const _SummaryItem(
-                      label: 'Pengerjaan Dinding & Plafon, Pengerjaan Plafon, Pertukangan (Pintu Kayu), Lantai Vinyl / Parket, Instalasi Listrik',
-                      value: '',
-                      isLarge: true,
-                    ),
-                  ],
+                      const SizedBox(height: 12),
+                      ...result.assumptions.map((a) => _SummaryItem(
+                            label: a.field,
+                            value: a.value,
+                            subtitle: a.reason,
+                            isWarning: a.needsClarification,
+                          )),
+                    ],
+                  ),
                 ),
-              ),
               const SizedBox(height: 32),
               // Buttons
               Padding(
@@ -300,12 +379,7 @@ class RaiHasilScreen extends StatelessWidget {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
-                          // Simple action to show confirmation
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Project disimpan!')),
-                          );
-                        },
+                        onPressed: _isSaving ? null : _saveToProject,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2563EB),
                           foregroundColor: Colors.white,
@@ -315,20 +389,30 @@ class RaiHasilScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(Icons.save_rounded, size: 18),
-                            SizedBox(width: 8),
-                            Text(
-                              'Simpan ke Project',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                fontFamily: 'PPNeueMontrealMedium',
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Wrap(
+                            alignment: WrapAlignment.center,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            children: [
+                              _isSaving 
+                                ? const SizedBox(
+                                    width: 16, 
+                                    height: 16, 
+                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                                  )
+                                : const Icon(Icons.save_rounded, size: 16),
+                              Text(
+                                _isSaving ? 'Menyimpan...' : 'Simpan ke Project',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'PPNeueMontrealMedium',
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -345,51 +429,44 @@ class RaiHasilScreen extends StatelessWidget {
 }
 
 class _BreakdownTable extends StatelessWidget {
+  final List<BreakdownItem> breakdown;
+
+  const _BreakdownTable({required this.breakdown});
+
+  String _formatCurrency(double amount) {
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+    return formatter.format(amount);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Table(
+      columnWidths: const {
+        0: FlexColumnWidth(2),
+        1: FlexColumnWidth(1.2),
+        2: FlexColumnWidth(2.5),
+      },
       border: TableBorder(
         horizontalInside: BorderSide(
           color: AppColors.dividerColor(context),
         ),
       ),
-      children: [
-        TableRow(
+      children: breakdown.map((item) {
+        return TableRow(
           children: [
-            _TableCell('Pengerjaan Dinding & Plafon', isHeader: true),
-            _TableCell('AREA 25 m²', isHeader: true, align: TextAlign.right),
-            _TableCell('Rp 2.415.000 – Rp 3.622.500', isHeader: true, align: TextAlign.right),
+            _TableCell(item.jobType),
+            _TableCell('AREA ${item.area.toStringAsFixed(0)} m²',
+                align: TextAlign.right),
+            _TableCell(
+                '${_formatCurrency(item.min)} – ${_formatCurrency(item.max)}',
+                align: TextAlign.right),
           ],
-        ),
-        TableRow(
-          children: [
-            _TableCell('Pengerjaan Plafon'),
-            _TableCell('AREA 25 m²', align: TextAlign.right),
-            _TableCell('Rp 2.415.000 – Rp 3.622.500', align: TextAlign.right),
-          ],
-        ),
-        TableRow(
-          children: [
-            _TableCell('Pertukangan (Pintu Kayu)'),
-            _TableCell('AREA 25 m²', align: TextAlign.right),
-            _TableCell('Rp 5.896.562 – Rp 11.771.125', align: TextAlign.right),
-          ],
-        ),
-        TableRow(
-          children: [
-            _TableCell('Lantai Vinyl / Parket'),
-            _TableCell('AREA 25 m²', align: TextAlign.right),
-            _TableCell('Rp 11.582.000 – Rp 21.735.000', align: TextAlign.right),
-          ],
-        ),
-        TableRow(
-          children: [
-            _TableCell('Instalasi Listrik'),
-            _TableCell('AREA 25 m²', align: TextAlign.right),
-            _TableCell('Rp 3.852.500 – Rp 14.191.875', align: TextAlign.right),
-          ],
-        ),
-      ],
+        );
+      }).toList(),
     );
   }
 }
@@ -408,12 +485,14 @@ class _TableCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
       child: Text(
         text,
         textAlign: align,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: isHeader ? FontWeight.w700 : FontWeight.w400,
           color: isHeader
               ? AppColors.textPrimary(context)
@@ -428,60 +507,67 @@ class _TableCell extends StatelessWidget {
 class _SummaryItem extends StatelessWidget {
   final String label;
   final String value;
-  final bool isLarge;
+  final String? subtitle;
+  final bool isWarning;
 
   const _SummaryItem({
     required this.label,
     required this.value,
-    this.isLarge = false,
+    this.subtitle,
+    this.isWarning = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (isLarge)
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary(context),
-                fontFamily: 'PPNeueMontrealMedium',
+          Row(
+            children: [
+              Icon(
+                isWarning ? Icons.info_outline_rounded : Icons.check_circle_rounded,
+                size: 16,
+                color: isWarning ? Colors.orange : AppColors.coconutGreen,
               ),
-            )
-          else
-            Row(
-              children: [
-                const Icon(
-                  Icons.check_circle_rounded,
-                  size: 16,
-                  color: AppColors.coconutGreen,
-                ),
-                const SizedBox(width: 8),
-                Text(
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
                   label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary(context),
                     fontFamily: 'PPNeueMontrealMedium',
                   ),
                 ),
-                const Spacer(),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary(context),
-                    fontFamily: 'PPNeueMontrealMedium',
-                  ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary(context),
+                  fontFamily: 'PPNeueMontrealMedium',
                 ),
-              ],
+              ),
+            ],
+          ),
+          if (subtitle != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 24, top: 2),
+              child: Text(
+                subtitle!,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: AppColors.textSecondary(context),
+                  fontFamily: 'PPNeueMontrealMedium',
+                ),
+              ),
             ),
         ],
       ),

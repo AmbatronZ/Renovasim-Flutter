@@ -1,8 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/theme_provider.dart';
-import 'home_screen.dart';
+import '../../core/providers/user_session_provider.dart';
+import '../../core/laravel_api_config.dart';
+import '../../data/models/room_model.dart';
+import '../../data/repositories/room_repository.dart';
 import 'dashboard_screen.dart';
 
 class T3DScreen extends StatefulWidget {
@@ -13,8 +17,10 @@ class T3DScreen extends StatefulWidget {
 }
 
 class _3DScreenState extends State<T3DScreen> {
-  String _selectedStyle = 'Modern Scandinavian';
   int _selectedNav = 1;
+  List<RoomModel> _captures = [];
+  bool _isLoading = true;
+  String? _error;
 
   final List<_NavItem> _navItems = const [
     _NavItem(icon: Icons.folder_copy_rounded, label: 'Projects'),
@@ -22,30 +28,61 @@ class _3DScreenState extends State<T3DScreen> {
     _NavItem(icon: Icons.dashboard_rounded, label: 'Dashboard'),
   ];
 
-  final List<String> _styles = [
-    'Modern Scandinavian',
-    'Industrial Loft',
-    'Japandi',
-    'Bohemian',
-    'Minimalist',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadLaravelCaptures();
+    });
+  }
 
-  // Dummy recent captures
-  final List<_CaptureItem> _captures = const [
-    _CaptureItem(
-      imagePath: 'assets/images/background3.png',
-      label: null,
-    ),
-    _CaptureItem(
-      imagePath: 'assets/images/background4.png',
-      label: null,
-    ),
-    _CaptureItem(
-      imagePath: 'assets/images/background5.png',
-      label: 'NEW SCAN',
-      isNewScan: true,
-    ),
-  ];
+  Future<void> _loadLaravelCaptures() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    final userSession = context.read<UserSessionProvider>();
+    final userId = userSession.userId;
+
+    if (userId == null) {
+      setState(() {
+        _isLoading = false;
+        _error = 'User tidak terautentikasi. Silakan login kembali.';
+      });
+      return;
+    }
+
+    try {
+      final rooms = await RoomRepository.getRoomsByUserId(userId);
+      setState(() {
+        _captures = rooms;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _error = 'Gagal memuat capture dari Supabase. Pastikan koneksi aktif.';
+      });
+    }
+  }
+
+  Future<void> _openRoomEditor(int roomId) async {
+    final String urlString = '${LaravelApiConfig.baseUrl}/room/$roomId/editor';
+    final Uri url = Uri.parse(urlString);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        messenger.showSnackBar(
+          SnackBar(content: Text('Tidak dapat membuka editor room: $urlString')),
+        );
+      }
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan membuka browser: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +129,7 @@ class _3DScreenState extends State<T3DScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'Select a starting point for your AI-powered\nrenovation.',
+                      'AI-generated structural 3D models and room layouts.',
                       style: TextStyle(
                         fontSize: 13,
                         color: AppColors.textSecondary(context),
@@ -104,120 +141,7 @@ class _3DScreenState extends State<T3DScreen> {
                 ),
               ),
 
-              const SizedBox(height: 24),
-
-              // ─── Upload Blueprint Card ────────────────────────────
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _UploadBlueprintCard(),
-              ),
-
-              const SizedBox(height: 14),
-
-              // ─── Capture Space Card ───────────────────────────────
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _CaptureSpaceCard(),
-              ),
-
-              const SizedBox(height: 24),
-
-              // ─── Design Aesthetics ────────────────────────────────
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Design Aesthetics',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary(context),
-                        fontFamily: 'PPEditorialNew',
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.coconutGreen.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        'STYLE ENGINE 4.0',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.coconutGreen,
-                          letterSpacing: 0.8,
-                          fontFamily: 'PPNeueMontrealMedium',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // Style chips — horizontal scroll
-              SizedBox(
-                height: 38,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  itemCount: _styles.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (_, i) {
-                    final isSelected = _styles[i] == _selectedStyle;
-                    return GestureDetector(
-                      onTap: () =>
-                          setState(() => _selectedStyle = _styles[i]),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.coconutGreen
-                              : AppColors.cardBackground(context),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isSelected
-                                ? AppColors.coconutGreen
-                                : AppColors.dividerColor(context),
-                          ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: AppColors.coconutGreen
-                                        .withOpacity(0.25),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 3),
-                                  )
-                                ]
-                              : [],
-                        ),
-                        child: Text(
-                          _styles[i],
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.w400,
-                            color: isSelected
-                                ? Colors.white
-                                : AppColors.textSecondary(context),
-                            fontFamily: 'PPNeueMontrealMedium',
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
 
               // ─── Recent Captures ──────────────────────────────────
               Padding(
@@ -225,48 +149,46 @@ class _3DScreenState extends State<T3DScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Recent Captures',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary(context),
-                        fontFamily: 'PPEditorialNew',
+                    Expanded(
+                      child: Text(
+                        'Recent Captures',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary(context),
+                          fontFamily: 'PPEditorialNew',
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 12),
                     GestureDetector(
-                      onTap: () {},
-                      child: Text(
-                        'View Library',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.coconutGreen,
-                          fontFamily: 'PPNeueMontrealMedium',
-                        ),
+                      onTap: _loadLaravelCaptures,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.refresh_rounded, size: 14, color: AppColors.coconutGreen),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Refresh',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.coconutGreen,
+                              fontFamily: 'PPNeueMontrealMedium',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
 
-              // Captures grid
+              // Loading / Error / Empty States & Grid
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 1.1,
-                  ),
-                  itemCount: _captures.length,
-                  itemBuilder: (_, i) => _CaptureCard(item: _captures[i]),
-                ),
+                child: _buildMainContent(),
               ),
 
               const SizedBox(height: 32),
@@ -279,13 +201,10 @@ class _3DScreenState extends State<T3DScreen> {
         selectedIndex: _selectedNav,
         onTap: (i) {
           if (i == 0) {
-            // Navigate back to Home/Projects
             Navigator.popUntil(context, (route) => route.isFirst);
           } else if (i == 1) {
-            // Already on 3D Design
             setState(() => _selectedNav = 1);
           } else if (i == 2) {
-            // Navigate to Dashboard
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (_) => const DashboardScreen()),
@@ -295,338 +214,247 @@ class _3DScreenState extends State<T3DScreen> {
       ),
     );
   }
-}
 
-// ─── Upload Blueprint Card ────────────────────────────────────────────────────
+  Widget _buildMainContent() {
+    if (_isLoading) {
+      return Container(
+        height: 200,
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator(color: AppColors.coconutGreen),
+      );
+    }
 
-class _UploadBlueprintCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground(context),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AppColors.dividerColor(context),
+    if (_error != null) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground(context),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.red.withOpacity(0.3)),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowColor(context),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Icon
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: AppColors.scaffoldBackground(context),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.dividerColor(context)),
+        child: Column(
+          children: [
+            const Icon(Icons.error_outline_rounded, color: Colors.red, size: 36),
+            const SizedBox(height: 10),
+            Text(
+              _error!,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary(context),
+                fontFamily: 'PPNeueMontrealMedium',
+              ),
             ),
-            child: Icon(
-              Icons.folder_outlined,
-              color: AppColors.textSecondary(context),
-              size: 22,
+            const SizedBox(height: 14),
+            ElevatedButton.icon(
+              onPressed: _loadLaravelCaptures,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Coba Lagi'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.coconutGreen,
+                foregroundColor: Colors.white,
+              ),
             ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Upload Blueprint',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary(context),
-                    fontFamily: 'PPEditorialNew',
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Import technical floor plans (PDF, JPG, CAD) for hyper-accurate structural reconstruction.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary(context),
-                    height: 1.5,
-                    fontFamily: 'PPNeueMontrealMedium',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                GestureDetector(
-                  onTap: () {},
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          'START IMPORT',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.coconutGreen,
-                            letterSpacing: 0.5,
-                            fontFamily: 'PPNeueMontrealMedium',
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_forward_rounded,
-                        size: 14,
-                        color: AppColors.coconutGreen,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Decorative triangle icon
-          Opacity(
-            opacity: 0.08,
-            child: Icon(
-              Icons.change_history_rounded,
-              size: 48,
-              color: AppColors.textPrimary(context),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Capture Space Card ───────────────────────────────────────────────────────
-
-class _CaptureSpaceCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.coconutGreen,
-            AppColors.thatchGreen,
           ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.coconutGreen.withOpacity(0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Camera icon
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.camera_alt_outlined,
-                    color: Colors.white,
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  'Capture Space',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    fontFamily: 'PPEditorialNew',
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Use your camera to scan the room in real-time. AI detects dimensions and fixtures automatically.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white.withOpacity(0.85),
-                    height: 1.5,
-                    fontFamily: 'PPNeueMontrealMedium',
-                  ),
-                ),
-                const SizedBox(height: 14),
-                GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                          color: Colors.white.withOpacity(0.4)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'OPEN CAMERA',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                            letterSpacing: 0.8,
-                            fontFamily: 'PPNeueMontrealMedium',
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Container(
-                          width: 18,
-                          height: 18,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.add_rounded,
-                            size: 12,
-                            color: AppColors.coconutGreen,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Decorative illustration
-          Opacity(
-            opacity: 0.15,
-            child: Icon(
-              Icons.home_outlined,
-              size: 72,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Capture Card ─────────────────────────────────────────────────────────────
-
-class _CaptureCard extends StatelessWidget {
-  final _CaptureItem item;
-  const _CaptureCard({required this.item});
-
-  @override
-  Widget build(BuildContext context) {
-    if (item.isNewScan) {
-      return GestureDetector(
-        onTap: () {},
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.cardBackground(context),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: AppColors.dividerColor(context),
-              style: BorderStyle.solid,
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.coconutGreen.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.add_a_photo_outlined,
-                  color: AppColors.coconutGreen,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'NEW SCAN',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textSecondary(context),
-                  letterSpacing: 0.8,
-                  fontFamily: 'PPNeueMontrealMedium',
-                ),
-              ),
-            ],
-          ),
         ),
       );
     }
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(
-            item.imagePath,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
-              color: AppColors.thatchGreen,
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.4),
-                ],
+    if (_captures.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground(context),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.dividerColor(context)),
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.view_in_ar_rounded, size: 48, color: AppColors.textSecondary(context).withOpacity(0.5)),
+            const SizedBox(height: 14),
+            Text(
+              'Belum Ada Capture Ruangan',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary(context),
+                fontFamily: 'PPEditorialNew',
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 6),
+            Text(
+              'Gunakan dashboard web untuk memindai atau membuat visualisasi ruangan 3D baru.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 11,
+                color: AppColors.textSecondary(context),
+                fontFamily: 'PPNeueMontrealMedium',
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.05,
+      ),
+      itemCount: _captures.length,
+      itemBuilder: (_, i) => _CaptureRoomCard(
+        room: _captures[i],
+        onTap: () => _openRoomEditor(_captures[i].id),
       ),
     );
   }
 }
 
-// ─── Data Model ───────────────────────────────────────────────────────────────
+// ─── Capture Room Card (Premium Architectural Design) ─────────────────────────
 
-class _CaptureItem {
-  final String imagePath;
-  final String? label;
-  final bool isNewScan;
+class _CaptureRoomCard extends StatelessWidget {
+  final RoomModel room;
+  final VoidCallback onTap;
 
-  const _CaptureItem({
-    required this.imagePath,
-    this.label,
-    this.isNewScan = false,
-  });
+  const _CaptureRoomCard({required this.room, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    // Check if thumbnail exists (Supabase URL or Base64)
+    final bool isNetworkImage = room.imagePath != null && room.imagePath!.isNotEmpty && room.imagePath!.startsWith('http');
+    final bool isBase64Image = room.imagePath != null && room.imagePath!.isNotEmpty && room.imagePath!.startsWith('data:image');
+    
+    ImageProvider? imageProvider;
+    if (isNetworkImage) {
+      imageProvider = NetworkImage(room.imagePath!);
+    } else if (isBase64Image) {
+      try {
+        final base64Str = room.imagePath!.split(',').last;
+        imageProvider = MemoryImage(base64Decode(base64Str));
+      } catch (e) {
+        print('Error decoding base64: $e');
+      }
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground(context),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.dividerColor(context)),
+        ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Background Image or Placeholder
+            if (imageProvider != null)
+              Image(
+                image: imageProvider,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _buildPlaceholder(context),
+              )
+            else
+              _buildPlaceholder(context),
+
+            // Gradient Overlay
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.0),
+                    Colors.black.withOpacity(0.7),
+                  ],
+                ),
+              ),
+            ),
+
+            // Room Name and Details
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    room.name ?? 'Untitled Room',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      fontFamily: 'PPNeueMontrealMedium',
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${(room.width * room.length).toStringAsFixed(1)}m²',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white.withOpacity(0.8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFF3D4E2C),
+            const Color(0xFF232B18),
+          ],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.room_preferences_outlined,
+              size: 32,
+              color: Colors.white.withOpacity(0.2),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                room.name ?? 'Untitled Room',
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white.withOpacity(0.3),
+                  fontFamily: 'PPNeueMontrealMedium',
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 // ─── Bottom Navigation ────────────────────────────────────────────────────────
@@ -663,37 +491,41 @@ class _BottomNav extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(items.length, (i) {
               final selected = i == selectedIndex;
-              return GestureDetector(
-                onTap: () => onTap(i),
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 4),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        items[i].icon,
-                        size: 22,
-                        color: selected
-                            ? AppColors.coconutGreen
-                            : AppColors.textSecondary(context),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        items[i].label,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: selected
-                              ? FontWeight.w700
-                              : FontWeight.w400,
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => onTap(i),
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          items[i].icon,
+                          size: 22,
                           color: selected
                               ? AppColors.coconutGreen
                               : AppColors.textSecondary(context),
-                          fontFamily: 'PPNeueMontrealMedium',
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          items[i].label,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: selected
+                                ? FontWeight.w700
+                                : FontWeight.w400,
+                            color: selected
+                                ? AppColors.coconutGreen
+                                : AppColors.textSecondary(context),
+                            fontFamily: 'PPNeueMontrealMedium',
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

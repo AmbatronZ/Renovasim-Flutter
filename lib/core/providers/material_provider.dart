@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/material_model.dart';
 import '../../data/models/project_material_model.dart';
+import '../../data/repositories/laravel_material_repository.dart';
 import '../../data/repositories/material_repository.dart';
 import '../../data/repositories/project_material_repository.dart';
 
@@ -23,7 +24,13 @@ class MaterialProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _allMaterials = await MaterialRepository.getAllMaterials();
+      // Mengambil dari Laravel API sesuai Fase 2
+      _allMaterials = await LaravelMaterialRepository.getMaterials();
+      
+      // Fallback ke Supabase jika Laravel kosong
+      if (_allMaterials.isEmpty) {
+        _allMaterials = await MaterialRepository.getAllMaterials();
+      }
       _error = null;
     } catch (e) {
       _error = e.toString();
@@ -40,7 +47,13 @@ class MaterialProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _materialsByCategory = await MaterialRepository.getMaterialsByCategory(category);
+      // Mengambil dari Laravel API
+      _materialsByCategory = await LaravelMaterialRepository.getMaterialsByCategory(category);
+      
+      // Fallback ke Supabase jika Laravel kosong
+      if (_materialsByCategory.isEmpty) {
+        _materialsByCategory = await MaterialRepository.getMaterialsByCategory(category);
+      }
       _error = null;
     } catch (e) {
       _error = e.toString();

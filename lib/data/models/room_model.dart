@@ -9,32 +9,39 @@ class RoomModel {
   final Map<String, dynamic>? layoutData;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? imagePath;
 
   RoomModel({
     required this.id,
     required this.userId,
     this.name,
     this.description,
-    this.width = 4,
-    this.length = 5,
-    this.height = 3,
+    required this.width,
+    required this.length,
+    required this.height,
     this.layoutData,
     required this.createdAt,
     required this.updatedAt,
+    this.imagePath,
   });
 
   factory RoomModel.fromJson(Map<String, dynamic> json) {
     return RoomModel(
-      id: json['id'] as int,
-      userId: json['user_id'] as int,
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      userId: (json['user_id'] as num?)?.toInt() ?? 0,
       name: json['name'] as String?,
       description: json['description'] as String?,
       width: (json['width'] as num?)?.toDouble() ?? 4,
       length: (json['length'] as num?)?.toDouble() ?? 5,
       height: (json['height'] as num?)?.toDouble() ?? 3,
       layoutData: json['layout_data'] as Map<String, dynamic>?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: json['created_at'] != null 
+          ? DateTime.parse(json['created_at'] as String)
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null 
+          ? DateTime.parse(json['updated_at'] as String)
+          : DateTime.now(),
+      imagePath: json['image_path'] as String?,
     );
   }
 
